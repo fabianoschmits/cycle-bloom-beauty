@@ -314,3 +314,192 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Empty({ text }: { text: string }) {
   return <p className="mt-6 text-center text-xs text-muted-foreground">{text}</p>;
 }
+
+const SYMPTOM_LABEL: Record<string, string> = {
+  cramps: "Cólicas",
+  headache: "Dor de cabeça",
+  bloating: "Inchaço",
+  tender_breasts: "Seios sensíveis",
+  backache: "Dor nas costas",
+  acne: "Acne",
+  nausea: "Náusea",
+  fatigue: "Fadiga",
+  cravings: "Desejos",
+};
+
+type Day = {
+  date: string;
+  dateObj: Date;
+  log: DailyLog | undefined;
+  phase: PhaseMark;
+};
+
+function DayCell({ day }: { day: Day }) {
+  const [open, setOpen] = useState(false);
+  const meta = day.log?.mood ? MOOD_META[day.log.mood] : null;
+  const phaseColor = day.phase ? PHASE_META[day.phase].color : null;
+  const bg = meta ? meta.color : "var(--color-secondary)";
+  const border = meta ? meta.ink : "var(--color-border)";
+  const dayLabel = format(day.dateObj, "d 'de' MMMM", { locale: ptBR });
+
+  const aria = [
+    dayLabel,
+    meta ? `humor ${meta.label}` : "sem humor registrado",
+    day.phase ? PHASE_META[day.phase].label : null,
+    day.log?.flow ? "menstruação registrada" : null,
+  ].filter(Boolean).join(", ");
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="relative flex aspect-square min-h-8 min-w-8 items-center justify-center overflow-hidden rounded-md border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
+          style={{
+            backgroundColor: bg,
+            borderColor: border,
+            opacity: meta ? 1 : 0.75,
+          }}
+          aria-label={aria}
+        >
+          {phaseColor && (
+            <span
+              className="absolute inset-x-0 top-0 h-1"
+              style={{ backgroundColor: phaseColor }}
+              aria-hidden="true"
+            />
+          )}
+          {day.phase === "ovulation" && (
+            <span
+              className="relative h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: "var(--color-phase-follicular)", boxShadow: "0 0 0 2px var(--color-card)" }}
+              aria-hidden="true"
+            />
+          )}
+          {day.log?.flow && !day.phase && (
+            <span
+              className="absolute inset-x-0 top-0 h-1"
+              style={{ backgroundColor: "var(--color-phase-menstrual)" }}
+              aria-hidden="true"
+            />
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="center" className="w-60 p-3 text-sm">
+        <div className="font-display text-base capitalize text-foreground">{dayLabel}</div>
+        <div className="mt-2 space-y-1.5 text-xs">
+          {meta ? (
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-full border-2"
+                style={{ backgroundColor: meta.color, borderColor: meta.ink }}
+                aria-hidden="true"
+              />
+              <span className="text-foreground">
+                {meta.emoji} {meta.label}
+              </span>
+            </div>
+          ) : (
+            <div className="text-muted-foreground">Humor não registrado</div>
+          )}
+          {day.phase && (
+            <div className="flex items-center gap-2 text-foreground">
+              <span
+                className="inline-block h-1.5 w-5 rounded-full"
+                style={{ backgroundColor: PHASE_META[day.phase].color }}
+                aria-hidden="true"
+              />
+              {PHASE_META[day.phase].label}
+            </div>
+          )}
+          {day.log?.flow && (
+            <div className="text-foreground">Fluxo: <span className="capitalize text-muted-foreground">{day.log.flow}</span></div>
+          )}
+          {day.log?.symptoms && day.log.symptoms.length > 0 && (
+            <div>
+              <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">Sintomas</div>
+              <ul className="mt-1 flex flex-wrap gap-1">
+                {day.log.symptoms.map((s) => (
+                  <li
+                    key={s}
+                    className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-secondary-foreground"
+                  >
+                    {SYMPTOM_LABEL[s] ?? s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {typeof day.log?.sleepHours === "number" && (
+            <div className="text-muted-foreground">Sono: {day.log.sleepHours}h</div>
+          )}
+          {day.log?.notes && (
+            <div className="mt-1 border-t border-border/60 pt-1.5 text-muted-foreground">
+              {day.log.notes}
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MoodBarPopover({
+  mood,
+  meta,
+  count,
+  logs,
+  children,
+}: {
+  mood: Mood;
+  meta: MoodMeta;
+  count: number;
+  logs: Record<string, DailyLog>;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const recent = useMemo(() => {
+    return Object.values(logs)
+      .filter((l) => l.mood === mood)
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .slice(0, 5);
+  }, [logs, mood]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent side="top" align="center" className="w-64 p-3 text-sm">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-4 w-4 rounded-full border-2"
+            style={{ backgroundColor: meta.color, borderColor: meta.ink }}
+            aria-hidden="true"
+          />
+          <span className="font-display text-base text-foreground">
+            {meta.emoji} {meta.label}
+          </span>
+          <span className="ml-auto text-xs text-muted-foreground">{count} dia{count === 1 ? "" : "s"}</span>
+        </div>
+        {recent.length === 0 ? (
+          <p className="mt-2 text-xs text-muted-foreground">Sem registros ainda.</p>
+        ) : (
+          <ul className="mt-2 space-y-1.5 text-xs">
+            {recent.map((l) => (
+              <li key={l.date} className="border-t border-border/60 pt-1.5 first:border-0 first:pt-0">
+                <div className="text-foreground">
+                  {format(parseISO(l.date), "d 'de' MMM", { locale: ptBR })}
+                </div>
+                {l.symptoms && l.symptoms.length > 0 && (
+                  <div className="mt-0.5 text-muted-foreground">
+                    {l.symptoms.map((s) => SYMPTOM_LABEL[s] ?? s).join(" · ")}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
