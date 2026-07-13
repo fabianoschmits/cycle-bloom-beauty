@@ -34,6 +34,7 @@ export const Route = createFileRoute("/stats")({
 });
 
 function StatsPage() {
+  useRegisterPWA();
   const { profile, periodDays, logs } = useLuna();
   const starts = detectPeriodStarts(periodDays);
   const avgCycle = profile ? avgCycleFromHistory(starts, profile.avgCycleLength) : 28;
