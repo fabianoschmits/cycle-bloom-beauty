@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { Download, X, ChevronRight, Smartphone, Share2, MoreVertical, PlusSquare, Monitor } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
