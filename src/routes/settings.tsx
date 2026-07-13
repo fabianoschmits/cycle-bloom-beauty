@@ -11,6 +11,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const { profile } = useLuna();
   const [dark, setDark] = useState(false);
