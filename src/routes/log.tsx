@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, type ReactNode } from "react";
 import { Screen, ScreenSection } from "@/components/Screen";
-import { Pressable } from "@/components/Pressable";
+import { Pressable, PressableDiv } from "@/components/Pressable";
 import { InfoTip } from "@/components/InfoTip";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { getLog, saveLog } from "@/lib/cycle/storage";
@@ -388,7 +388,7 @@ function ToggleField({
 }) {
   return (
     <div className="col-span-2">
-      <Pressable
+      <PressableDiv
         haptic
         onClick={() => onChange(!value)}
         className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-3 text-left"
@@ -407,7 +407,7 @@ function ToggleField({
             transition={springSnappy}
           />
         </span>
-      </Pressable>
+      </PressableDiv>
     </div>
   );
 }
