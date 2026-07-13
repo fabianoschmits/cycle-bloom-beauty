@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Screen } from "@/components/Screen";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/learn")({
@@ -47,6 +48,7 @@ melhora a precisão dos padrões observados.`,
 ];
 
 function LearnPage() {
+  useRegisterPWA();
   return (
     <Screen subtitle="Aprender" title="Saúde menstrual">
       <p className="mb-5 text-sm leading-relaxed text-muted-foreground">

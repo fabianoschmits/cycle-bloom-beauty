@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import {
   addDays, addMonths, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth,
   parseISO, startOfMonth, startOfWeek, endOfWeek,
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/calendar")({
 });
 
 function CalendarPage() {
+  useRegisterPWA();
   const { profile, periodDays, logs } = useLuna();
   const [cursor, setCursor] = useState(startOfMonth(new Date()));
   const [selected, setSelected] = useState<Date>(new Date());

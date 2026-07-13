@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Screen } from "@/components/Screen";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { saveProfile } from "@/lib/cycle/storage";
 import { formatName } from "@/lib/format-name";
 import type { UserProfile } from "@/lib/cycle/types";
@@ -16,6 +17,7 @@ const steps = ["welcome", "name", "cycle", "lastPeriod", "regularity", "done"] a
 type Step = (typeof steps)[number];
 
 function Onboarding() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("welcome");
   const [name, setName] = useState("");

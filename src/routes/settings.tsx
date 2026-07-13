@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { clearAll, exportAll, importAll, saveProfile } from "@/lib/cycle/storage";
 import { Moon, Sun, Download, Upload, Trash2, Bell } from "lucide-react";
 
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const { profile } = useLuna();
   const [dark, setDark] = useState(false);

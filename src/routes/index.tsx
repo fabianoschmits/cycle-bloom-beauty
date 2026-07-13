@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { phaseInfo } from "@/lib/cycle/calculations";
 import { format, parseISO, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -32,6 +33,7 @@ function usePillTakenToday() {
 }
 
 function Today() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const { profile, insight, logs, ready } = useLuna();
   const pillTaken = usePillTakenToday();
