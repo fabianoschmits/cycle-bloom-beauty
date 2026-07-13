@@ -115,6 +115,14 @@
   --phase-follicular: oklch(0.83 0.12 90);
   --phase-ovulation: oklch(0.78 0.13 165);
   --phase-luteal: oklch(0.72 0.11 285);
+
+  --mood-calm: oklch(0.72 0.06 220);
+  --mood-happy: oklch(0.8 0.09 95);
+  --mood-sad: oklch(0.68 0.06 255);
+  --mood-anxious: oklch(0.76 0.08 45);
+  --mood-irritable: oklch(0.72 0.09 20);
+  --mood-energetic: oklch(0.76 0.09 150);
+  --mood-tired: oklch(0.7 0.03 300);
 }
 
 @layer base {
