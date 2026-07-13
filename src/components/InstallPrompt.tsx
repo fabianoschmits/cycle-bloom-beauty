@@ -166,6 +166,7 @@ export function InstallPrompt() {
   }, []);
 
   if (!mounted) return null;
+  if (pathname.startsWith("/onboarding") || pathname.startsWith("/lock")) return null;
   if (!ctx) return null;
   if (ctx.isStandalone) return null;
   if (dismissed) return null;
