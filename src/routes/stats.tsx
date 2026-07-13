@@ -3,21 +3,30 @@ import { motion } from "framer-motion";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
 import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculations";
-import type { Mood } from "@/lib/cycle/types";
-import { differenceInDays, parseISO, subDays, format } from "date-fns";
+import type { DailyLog, Mood } from "@/lib/cycle/types";
+import { addDays, differenceInDays, parseISO, subDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const MOOD_META: Record<Mood, { label: string; emoji: string; color: string }> = {
-  calm: { label: "Calma", emoji: "😌", color: "var(--color-mood-calm)" },
-  happy: { label: "Feliz", emoji: "😊", color: "var(--color-mood-happy)" },
-  sad: { label: "Triste", emoji: "😢", color: "var(--color-mood-sad)" },
-  anxious: { label: "Ansiosa", emoji: "😰", color: "var(--color-mood-anxious)" },
-  irritable: { label: "Irritada", emoji: "😤", color: "var(--color-mood-irritable)" },
-  energetic: { label: "Enérgica", emoji: "⚡️", color: "var(--color-mood-energetic)" },
-  tired: { label: "Cansada", emoji: "🥱", color: "var(--color-mood-tired)" },
+type MoodMeta = { label: string; emoji: string; color: string; ink: string };
+const MOOD_META: Record<Mood, MoodMeta> = {
+  calm: { label: "Calma", emoji: "😌", color: "var(--color-mood-calm)", ink: "var(--color-mood-calm-ink)" },
+  happy: { label: "Feliz", emoji: "😊", color: "var(--color-mood-happy)", ink: "var(--color-mood-happy-ink)" },
+  sad: { label: "Triste", emoji: "😢", color: "var(--color-mood-sad)", ink: "var(--color-mood-sad-ink)" },
+  anxious: { label: "Ansiosa", emoji: "😰", color: "var(--color-mood-anxious)", ink: "var(--color-mood-anxious-ink)" },
+  irritable: { label: "Irritada", emoji: "😤", color: "var(--color-mood-irritable)", ink: "var(--color-mood-irritable-ink)" },
+  energetic: { label: "Enérgica", emoji: "⚡️", color: "var(--color-mood-energetic)", ink: "var(--color-mood-energetic-ink)" },
+  tired: { label: "Cansada", emoji: "🥱", color: "var(--color-mood-tired)", ink: "var(--color-mood-tired-ink)" },
 };
 const MOOD_ORDER: Mood[] = ["calm", "happy", "energetic", "tired", "anxious", "irritable", "sad"];
+
+type PhaseMark = "menstrual" | "fertile" | "ovulation" | null;
+const PHASE_META: Record<Exclude<PhaseMark, null>, { label: string; color: string }> = {
+  menstrual: { label: "Menstruação", color: "var(--color-phase-menstrual)" },
+  fertile: { label: "Janela fértil", color: "var(--color-phase-ovulation)" },
+  ovulation: { label: "Ovulação", color: "var(--color-phase-follicular)" },
+};
 
 export const Route = createFileRoute("/stats")({
   component: StatsPage,
