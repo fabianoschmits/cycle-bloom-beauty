@@ -127,6 +127,7 @@ function RootComponent() {
       <div className="relative min-h-dvh bg-background text-foreground">
         <Outlet />
         {mounted && <BottomNav />}
+        {mounted && <InstallPrompt />}
       </div>
     </QueryClientProvider>
   );
