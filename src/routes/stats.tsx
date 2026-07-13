@@ -285,32 +285,6 @@ function StatsPage() {
         )}
       </Card>
 
-      <Card title="Últimos 30 dias">
-        <div className="mt-2 grid grid-cols-15 gap-1" style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}>
-          {last30.map((l, i) => {
-            const has = !!l;
-            const isPeriod = l?.flow;
-            return (
-              <div
-                key={i}
-                className="aspect-square rounded-md"
-                style={{
-                  backgroundColor: isPeriod
-                    ? "var(--phase-menstrual)"
-                    : has
-                      ? "color-mix(in oklab, var(--color-primary) 30%, transparent)"
-                      : "var(--color-secondary)",
-                }}
-                title={l?.date}
-              />
-            );
-          })}
-        </div>
-        <div className="mt-3 flex justify-between text-[10px] text-muted-foreground">
-          <span>{format(subDays(new Date(), 29), "d MMM", { locale: ptBR })}</span>
-          <span>hoje</span>
-        </div>
-      </Card>
 
       <p className="mt-6 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
         As correlações são observacionais. Consulte profissionais de saúde para diagnósticos.
