@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Screen } from "@/components/Screen";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { saveProfile } from "@/lib/cycle/storage";
 import { formatName } from "@/lib/format-name";
 import type { UserProfile } from "@/lib/cycle/types";
