@@ -74,10 +74,19 @@
   --input: oklch(0.92 0.01 40);
   --ring: oklch(0.58 0.14 15 / 0.5);
 
-  --phase-menstrual: oklch(0.62 0.17 18);
-  --phase-follicular: oklch(0.78 0.13 90);
-  --phase-ovulation: oklch(0.72 0.14 165);
-  --phase-luteal: oklch(0.65 0.11 285);
+  --phase-menstrual: oklch(0.82 0.08 18);
+  --phase-follicular: oklch(0.88 0.07 90);
+  --phase-ovulation: oklch(0.86 0.07 165);
+  --phase-luteal: oklch(0.84 0.06 285);
+
+  /* Pastel mood palette — soft, matches phase tokens */
+  --mood-calm: oklch(0.88 0.06 220);
+  --mood-happy: oklch(0.92 0.09 95);
+  --mood-sad: oklch(0.82 0.05 255);
+  --mood-anxious: oklch(0.88 0.07 45);
+  --mood-irritable: oklch(0.86 0.08 20);
+  --mood-energetic: oklch(0.88 0.08 150);
+  --mood-tired: oklch(0.84 0.03 300);
 }
 
 .dark {
