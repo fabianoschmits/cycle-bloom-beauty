@@ -432,7 +432,7 @@ const DayCell = forwardRef<HTMLButtonElement, DayCellProps>(function DayCell(
       </PopoverContent>
     </Popover>
   );
-}
+});
 
 function MoodBarPopover({
   mood,
