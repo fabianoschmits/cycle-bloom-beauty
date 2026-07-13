@@ -6,6 +6,37 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
+import type { Plugin } from "vite";
+
+/**
+ * VitePWA emits sw.js and workbox-*.js at the root of the Vite outDir.
+ * TanStack Start/Nitro serves static assets from dist/client, so we copy
+ * the generated service worker files into the public client folder after
+ * the client bundle is written.
+ */
+function copyServiceWorkerToClient(): Plugin {
+  return {
+    name: "copy-sw-to-client",
+    enforce: "post",
+    apply: "build",
+    async writeBundle(options) {
+      if (options.dir !== "dist/client") return;
+
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+      const root = process.cwd();
+      const srcDir = path.join(root, "dist");
+      const destDir = path.join(root, "dist", "client");
+
+      const entries = await fs.readdir(srcDir);
+      for (const entry of entries) {
+        if (entry === "sw.js" || entry.startsWith("workbox-")) {
+          await fs.copyFile(path.join(srcDir, entry), path.join(destDir, entry));
+        }
+      }
+    },
+  };
+}
 
 export default defineConfig({
   tanstackStart: {
@@ -69,6 +100,7 @@ export default defineConfig({
           ],
         },
       }),
+      copyServiceWorkerToClient(),
     ],
   },
 });
