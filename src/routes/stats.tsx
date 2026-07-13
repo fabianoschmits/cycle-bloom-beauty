@@ -6,7 +6,7 @@ import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculation
 import type { DailyLog, Mood } from "@/lib/cycle/types";
 import { addDays, differenceInDays, parseISO, subDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type MoodMeta = { label: string; emoji: string; color: string; ink: string };
