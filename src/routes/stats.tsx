@@ -166,42 +166,7 @@ function StatsPage() {
         ) : (
           <>
             {/* Emotion frequency — bars with high-contrast ink border/text */}
-            <div className="mt-5 flex h-40 items-end gap-2" role="list" aria-label="Frequência por humor">
-              {moodCounts.map(({ mood, count }, i) => {
-                const meta = MOOD_META[mood];
-                const h = count === 0 ? 6 : (count / moodMax) * 100;
-                return (
-                  <MoodBarPopover key={mood} mood={mood} meta={meta} count={count} logs={logs}>
-                    <button
-                      type="button"
-                      className="group flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-                      aria-label={`${meta.label}: ${count} registros. Toque para detalhes.`}
-                    >
-                      <span
-                        className="text-xs font-bold"
-                        style={{ color: count > 0 ? meta.ink : "var(--color-muted-foreground)" }}
-                      >
-                        {count > 0 ? count : "0"}
-                      </span>
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full rounded-t-xl border-2 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]"
-                        style={{
-                          backgroundColor: meta.color,
-                          borderColor: meta.ink,
-                          minHeight: 10,
-                          opacity: count === 0 ? 0.4 : 1,
-                        }}
-                      />
-                      <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
-                      <span className="sr-only">{meta.label}</span>
-                    </button>
-                  </MoodBarPopover>
-                );
-              })}
-            </div>
+            <MoodBarsRow moodCounts={moodCounts} moodMax={moodMax} logs={logs} />
 
             {/* 30-day strip with phase ribbon + tap-to-detail */}
             <div className="mt-6">
@@ -209,15 +174,13 @@ function StatsPage() {
                 <div className="text-[11px] font-medium uppercase tracking-wider text-foreground">
                   Últimos 30 dias
                 </div>
-                <div className="text-[10px] text-muted-foreground">Toque um dia para detalhes</div>
+                <div className="text-[10px] text-muted-foreground">
+                  Setas para navegar · Enter para detalhes
+                </div>
               </div>
-              <div
-                className="grid gap-1.5"
-                style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}
-              >
-                {last30.map((day, i) => (
-                  <DayCell key={i} day={day} />
-                ))}
+              <DayGrid days={last30} />
+            </div>
+
               </div>
               <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
                 <span>{format(subDays(new Date(), 29), "d MMM", { locale: ptBR })}</span>
