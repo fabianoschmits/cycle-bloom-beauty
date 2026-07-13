@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Screen } from "@/components/Screen";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/learn")({
