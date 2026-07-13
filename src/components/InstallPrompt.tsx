@@ -199,7 +199,7 @@ export function InstallPrompt() {
         role="banner"
         aria-label="Instalar app Luna"
         className={cn(
-          "fixed bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] left-4 right-4 z-40 mx-auto max-w-md",
+          "fixed bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] left-4 right-4 z-50 mx-auto max-w-md",
           "rounded-2xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur-sm",
           "animate-in slide-in-from-bottom-4 fade-in duration-300"
         )}
