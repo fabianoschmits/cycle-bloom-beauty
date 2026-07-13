@@ -48,6 +48,7 @@ melhora a precisão dos padrões observados.`,
 ];
 
 function LearnPage() {
+  useRegisterPWA();
   return (
     <Screen subtitle="Aprender" title="Saúde menstrual">
       <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
