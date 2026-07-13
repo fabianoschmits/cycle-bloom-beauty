@@ -32,25 +32,15 @@
         color: var(--fg);
         text-align: center;
       }
-      .card {
-        max-width: 22rem;
-      }
+      .card { max-width: 22rem; }
       .moon {
         width: 4rem;
         height: 4rem;
         margin: 0 auto 1.5rem;
         color: var(--primary);
       }
-      h1 {
-        margin: 0 0 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-      p {
-        margin: 0 0 1.75rem;
-        line-height: 1.6;
-        color: var(--muted);
-      }
+      h1 { margin: 0 0 0.5rem; font-size: 1.5rem; font-weight: 600; }
+      p { margin: 0 0 1.75rem; line-height: 1.6; color: var(--muted); }
       button {
         appearance: none;
         border: 0;
@@ -67,12 +57,12 @@
   </head>
   <body>
     <div class="card">
-      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
       </svg>
       <h1>Você está offline</h1>
-      <p>Não foi possível carregar o Luna. Verifique sua conexão com a internet e tente novamente.</p>
-      <button onclick="location.reload()">Tentar novamente</button>
+      <p>Abra o Luna pelo ícone instalado ou tente carregar a página inicial. Seus registros ficam salvos neste aparelho.</p>
+      <button type="button" onclick="location.replace('/')">Ir para o início</button>
     </div>
   </body>
 </html>

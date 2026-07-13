@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AnimatedOutlet } from "../components/AnimatedOutlet";
 import { BottomNav } from "../components/BottomNav";
 import { InstallPrompt } from "../components/InstallPrompt";
+import { OfflineBanner } from "../components/OfflineBanner";
 import { registerPWA } from "../lib/pwa-register";
 
 function NotFoundComponent() {
@@ -118,12 +119,17 @@ function ThemeInit() {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    setMounted(true);
+    registerPWA();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeInit />
       <div className="relative min-h-dvh bg-background text-foreground">
+        {mounted && <OfflineBanner />}
         <AnimatedOutlet />
         {mounted && <BottomNav />}
         {mounted && <InstallPrompt />}

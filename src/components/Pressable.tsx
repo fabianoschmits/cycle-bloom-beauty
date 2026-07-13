@@ -9,7 +9,6 @@ export function Pressable({ haptic = false, onClick, children, ...props }: Press
   return (
     <motion.button
       whileTap={{ scale: 0.96 }}
-      whileHover={{ scale: 1.01 }}
       transition={springSnappy}
       onClick={(e) => {
         if (haptic) hapticLight();

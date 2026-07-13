@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getLogs, getPeriodDays, getProfile } from "@/lib/cycle/storage";
 import type { DailyLog, UserProfile } from "@/lib/cycle/types";
 import { computeInsight } from "@/lib/cycle/calculations";
@@ -21,7 +21,10 @@ export function useLuna() {
     return () => window.removeEventListener("luna:update", load);
   }, []);
 
-  const insight = profile ? computeInsight(profile, periodDays) : null;
+  const insight = useMemo(
+    () => (profile ? computeInsight(profile, periodDays) : null),
+    [profile, periodDays],
+  );
 
   return { profile, logs, periodDays, insight, ready };
 }

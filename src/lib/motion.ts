@@ -42,40 +42,34 @@ export function getPageDirection(from: string, to: string): number {
 export const pageVariants: Variants = {
   enter: (dir: number) => ({
     opacity: 0,
-    x: dir === 0 ? 0 : dir === 2 ? 0 : dir * 32,
-    y: dir === 2 ? 28 : dir === 0 ? 8 : 0,
-    scale: dir === 0 ? 0.985 : 1,
-    filter: "blur(4px)",
+    x: dir === 0 ? 0 : dir === 2 ? 0 : dir * 24,
+    y: dir === 2 ? 16 : dir === 0 ? 6 : 0,
   }),
   center: {
     opacity: 1,
     x: 0,
     y: 0,
-    scale: 1,
-    filter: "blur(0px)",
   },
   exit: (dir: number) => ({
     opacity: 0,
-    x: dir === 0 ? 0 : dir === 2 ? 0 : dir * -20,
-    y: dir === 2 ? -16 : 0,
-    scale: dir === 0 ? 0.985 : 0.99,
-    filter: "blur(3px)",
+    x: dir === 0 ? 0 : dir === 2 ? 0 : dir * -16,
+    y: dir === 2 ? -10 : 0,
   }),
 };
 
 export const staggerContainer: Variants = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.03, delayChildren: 0 },
   },
 };
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.38, ease: nativeEase },
+    transition: { duration: 0.22, ease: nativeEase },
   },
 };
 

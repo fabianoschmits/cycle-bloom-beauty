@@ -1,4 +1,5 @@
 const PILL_KEY = "luna.pill.v1";
+const PILL_UPDATE = "luna:pill-update";
 
 export interface PillRecord {
   date: string; // YYYY-MM-DD
@@ -23,7 +24,7 @@ export function takePillNow(): PillRecord {
   const all = getPillRecords();
   all[date] = record;
   localStorage.setItem(PILL_KEY, JSON.stringify(all));
-  window.dispatchEvent(new Event("luna:update"));
+  window.dispatchEvent(new Event(PILL_UPDATE));
   return record;
 }
 
@@ -34,7 +35,7 @@ export function undoPillToday() {
   const all = getPillRecords();
   delete all[date];
   localStorage.setItem(PILL_KEY, JSON.stringify(all));
-  window.dispatchEvent(new Event("luna:update"));
+  window.dispatchEvent(new Event(PILL_UPDATE));
 }
 
 /** Average usual time (HH:mm) from last 30 records, or null if none. */
