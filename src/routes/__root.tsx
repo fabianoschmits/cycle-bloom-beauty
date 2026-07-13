@@ -119,11 +119,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  useEffect(() => {
-    // Side-effect anchor: ensures the effect is not tree-shaken.
-    document.documentElement.dataset.pwa = "ready";
-    registerPWA();
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
