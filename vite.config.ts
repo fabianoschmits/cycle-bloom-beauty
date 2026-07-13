@@ -87,7 +87,7 @@ export default defineConfig({
         },
         workbox: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2,ttf}"],
-          navigateFallback: "/",
+          navigateFallback: "/fallback.html",
           navigateFallbackDenylist: [/^\/\~oauth/],
           runtimeCaching: [
             {
