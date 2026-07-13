@@ -47,6 +47,14 @@
   --color-mood-irritable: var(--mood-irritable);
   --color-mood-energetic: var(--mood-energetic);
   --color-mood-tired: var(--mood-tired);
+
+  --color-mood-calm-ink: var(--mood-calm-ink);
+  --color-mood-happy-ink: var(--mood-happy-ink);
+  --color-mood-sad-ink: var(--mood-sad-ink);
+  --color-mood-anxious-ink: var(--mood-anxious-ink);
+  --color-mood-irritable-ink: var(--mood-irritable-ink);
+  --color-mood-energetic-ink: var(--mood-energetic-ink);
+  --color-mood-tired-ink: var(--mood-tired-ink);
 }
 
 :root {
@@ -87,6 +95,15 @@
   --mood-irritable: oklch(0.86 0.08 20);
   --mood-energetic: oklch(0.88 0.08 150);
   --mood-tired: oklch(0.84 0.03 300);
+
+  /* Darker "ink" variants for borders + text on pastel fills (WCAG AA on card) */
+  --mood-calm-ink: oklch(0.42 0.09 220);
+  --mood-happy-ink: oklch(0.45 0.12 85);
+  --mood-sad-ink: oklch(0.4 0.09 255);
+  --mood-anxious-ink: oklch(0.45 0.13 45);
+  --mood-irritable-ink: oklch(0.45 0.15 20);
+  --mood-energetic-ink: oklch(0.42 0.11 150);
+  --mood-tired-ink: oklch(0.4 0.03 300);
 }
 
 .dark {
@@ -123,6 +140,15 @@
   --mood-irritable: oklch(0.72 0.09 20);
   --mood-energetic: oklch(0.76 0.09 150);
   --mood-tired: oklch(0.7 0.03 300);
+
+  /* Dark ink for pastel fills (pastel fills are still light-ish, so keep ink dark) */
+  --mood-calm-ink: oklch(0.28 0.08 220);
+  --mood-happy-ink: oklch(0.3 0.1 85);
+  --mood-sad-ink: oklch(0.28 0.09 255);
+  --mood-anxious-ink: oklch(0.3 0.12 45);
+  --mood-irritable-ink: oklch(0.32 0.14 20);
+  --mood-energetic-ink: oklch(0.3 0.11 150);
+  --mood-tired-ink: oklch(0.28 0.03 300);
 }
 
 @layer base {
