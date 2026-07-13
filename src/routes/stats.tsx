@@ -46,26 +46,41 @@ function StatsPage() {
   }, [starts]);
 
   const last30 = useMemo(() => {
-    const cycleLen = avgCycle;
+    const cycleLen = Math.max(15, avgCycle);
     const periodLen = profile?.avgPeriodLength ?? 5;
     const sortedStarts = [...starts].sort();
     return Array.from({ length: 30 }, (_, i) => {
       const dateObj = subDays(new Date(), 29 - i);
       const date = format(dateObj, "yyyy-MM-dd");
-      // find the most recent period start on or before this date
-      let cycleStart: string | null = null;
+      const log = logs[date] as DailyLog | undefined;
+
+      // Anchor to most recent past period start (roll forward projected cycles
+      // if the newest start is older than one cycle length).
+      let anchor: string | null = null;
       for (let k = sortedStarts.length - 1; k >= 0; k--) {
-        if (sortedStarts[k] <= date) { cycleStart = sortedStarts[k]; break; }
+        if (sortedStarts[k] <= date) { anchor = sortedStarts[k]; break; }
       }
       let phase: PhaseMark = null;
-      if (cycleStart) {
-        const dayOfCycle = differenceInDays(dateObj, parseISO(cycleStart)) + 1;
+      if (anchor) {
+        const rawDoc = differenceInDays(dateObj, parseISO(anchor)) + 1;
+        // Project forward one or more full cycles when no newer start exists yet.
+        const projectedCycles = rawDoc > cycleLen ? Math.floor((rawDoc - 1) / cycleLen) : 0;
+        const dayOfCycle = rawDoc - projectedCycles * cycleLen;
         const ovulationDay = cycleLen - 14;
+        const isProjected = projectedCycles > 0;
+
         if (dayOfCycle >= 1 && dayOfCycle <= periodLen) phase = "menstrual";
         else if (dayOfCycle === ovulationDay) phase = "ovulation";
         else if (dayOfCycle >= ovulationDay - 5 && dayOfCycle <= ovulationDay + 1) phase = "fertile";
+
+        // Never predict menstruation from projection if the user already logged
+        // an actual flow-free day — respect the record as ground truth.
+        if (phase === "menstrual" && isProjected && log && !log.flow) phase = null;
       }
-      return { date, dateObj, log: logs[date] as DailyLog | undefined, phase };
+      // Actual logged flow always wins over any projection.
+      if (log?.flow) phase = "menstrual";
+
+      return { date, dateObj, log, phase };
     });
   }, [logs, starts, avgCycle, profile?.avgPeriodLength]);
 
