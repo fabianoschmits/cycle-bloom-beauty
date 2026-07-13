@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Screen } from "@/components/Screen";
+import { Screen, ScreenSection } from "@/components/Screen";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { ChevronDown } from "lucide-react";
 
@@ -51,13 +51,17 @@ function LearnPage() {
   useRegisterPWA();
   return (
     <Screen subtitle="Aprender" title="Saúde menstrual">
-      <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
-        Conteúdo educativo curado para você entender melhor seu corpo. Textos
-        introdutórios — para dúvidas específicas, procure um profissional de saúde.
-      </p>
+      <ScreenSection>
+        <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
+          Conteúdo educativo curado para você entender melhor seu corpo. Textos
+          introdutórios — para dúvidas específicas, procure um profissional de saúde.
+        </p>
+      </ScreenSection>
       <div className="space-y-3">
         {articles.map((a, i) => (
-          <Article key={a.title} article={a} index={i} />
+          <ScreenSection key={a.title}>
+            <Article article={a} index={i} />
+          </ScreenSection>
         ))}
       </div>
     </Screen>
@@ -68,12 +72,11 @@ function Article({ article, index }: { article: (typeof articles)[number]; index
   const [open, setOpen] = useState(false);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      layout
       className="overflow-hidden rounded-3xl border border-border/60 bg-card"
     >
-      <button
+      <motion.button
+        whileTap={{ scale: 0.99 }}
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between gap-3 p-5 text-left"
       >

@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState } from "react";
-import { Screen } from "@/components/Screen";
+import { Screen, ScreenSection } from "@/components/Screen";
+import { Pressable } from "@/components/Pressable";
 import { useLuna } from "@/hooks/useLuna";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
+import { hapticLight, nativeEase, springSnappy } from "@/lib/motion";
 import {
   addDays, addMonths, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth,
   parseISO, startOfMonth, startOfWeek, endOfWeek,
@@ -42,6 +44,7 @@ function CalendarPage() {
   const isPeriod = periodSet.has(selectedKey);
 
   function togglePeriod() {
+    hapticLight();
     if (isPeriod) {
       removePeriodDay(selectedKey);
     } else {
@@ -49,36 +52,49 @@ function CalendarPage() {
     }
   }
 
+  const monthKey = format(cursor, "yyyy-MM");
+
   return (
     <Screen
       subtitle="Ciclo"
       title={format(cursor, "MMMM yyyy", { locale: ptBR })}
       right={
         <div className="flex items-center gap-1">
-          <button
+          <Pressable
+            haptic
             onClick={() => setCursor(addMonths(cursor, -1))}
             className="grid h-10 w-10 place-items-center rounded-full bg-secondary"
             aria-label="Mês anterior"
           >
             <ChevronLeft size={18} />
-          </button>
-          <button
+          </Pressable>
+          <Pressable
+            haptic
             onClick={() => setCursor(addMonths(cursor, 1))}
             className="grid h-10 w-10 place-items-center rounded-full bg-secondary"
             aria-label="Próximo mês"
           >
             <ChevronRight size={18} />
-          </button>
+          </Pressable>
         </div>
       }
     >
-      <div className="grid grid-cols-7 gap-1 px-1 pb-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-        {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
-          <div key={i}>{d}</div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((d) => {
+      <ScreenSection>
+        <div className="grid grid-cols-7 gap-1 px-1 pb-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
+            <div key={i}>{d}</div>
+          ))}
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={monthKey}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.28, ease: nativeEase }}
+            className="grid grid-cols-7 gap-1"
+          >
+            {days.map((d, i) => {
           const key = format(d, "yyyy-MM-dd");
           const inMonth = isSameMonth(d, cursor);
           const isSel = isSameDay(d, selected);
@@ -102,10 +118,17 @@ function CalendarPage() {
           if (isNext) ring = "2px dashed var(--phase-menstrual)";
 
           return (
-            <button
+            <motion.button
               key={key}
-              onClick={() => setSelected(d)}
-              className="relative flex aspect-square items-center justify-center rounded-2xl text-sm transition-all active:scale-90"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.008, duration: 0.22, ease: nativeEase }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                hapticLight();
+                setSelected(d);
+              }}
+              className="relative flex aspect-square items-center justify-center rounded-2xl text-sm"
               style={{
                 backgroundColor: bg,
                 color: inMonth ? color : "color-mix(in oklab, var(--color-muted-foreground) 60%, transparent)",
@@ -116,28 +139,37 @@ function CalendarPage() {
             >
               {format(d, "d")}
               {logs[key] && !period && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                <motion.span
+                  layoutId={`log-dot-${key}`}
+                  className="absolute bottom-1 h-1 w-1 rounded-full bg-primary"
+                />
               )}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+          </motion.div>
+        </AnimatePresence>
+      </ScreenSection>
 
-      {/* Legend */}
-      <div className="mt-5 flex flex-wrap gap-3 rounded-2xl border border-border/60 bg-card p-4 text-xs text-muted-foreground">
+      <ScreenSection>
+        <div className="mt-1 flex flex-wrap gap-3 rounded-2xl border border-border/60 bg-card p-4 text-xs text-muted-foreground">
         <Legend color="var(--phase-menstrual)" label="Menstruação" />
         <Legend color="var(--phase-follicular)" label="Fértil" faded />
         <Legend color="var(--phase-ovulation)" label="Ovulação" />
         <Legend color="transparent" label="Próxima prevista" outline />
-      </div>
+        </div>
+      </ScreenSection>
 
-      {/* Day detail */}
-      <motion.div
-        key={selectedKey}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-5 rounded-3xl border border-border/60 bg-card p-5"
-      >
+      <ScreenSection>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedKey}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.28, ease: nativeEase }}
+            className="mt-1 rounded-3xl border border-border/60 bg-card p-5"
+          >
         <div className="flex items-baseline justify-between">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -147,7 +179,8 @@ function CalendarPage() {
               {format(selected, "d 'de' MMMM", { locale: ptBR })}
             </h3>
           </div>
-          <button
+          <Pressable
+            haptic
             onClick={togglePeriod}
             className="rounded-full px-4 py-2 text-xs font-semibold"
             style={{
@@ -156,7 +189,7 @@ function CalendarPage() {
             }}
           >
             {isPeriod ? "Menstruando" : "Marcar menstruação"}
-          </button>
+          </Pressable>
         </div>
         {selectedLog ? (
           <ul className="mt-4 space-y-1.5 text-sm text-foreground">
@@ -166,12 +199,16 @@ function CalendarPage() {
               <li>Sintomas: <span className="text-muted-foreground">{selectedLog.symptoms.join(", ")}</span></li>
             )}
             {selectedLog.sleepHours != null && <li>Sono: <span className="text-muted-foreground">{selectedLog.sleepHours}h</span></li>}
+            {selectedLog.weightKg != null && <li>Peso: <span className="text-muted-foreground">{selectedLog.weightKg} kg</span></li>}
+            {selectedLog.basalTemp != null && <li>Temp. basal: <span className="text-muted-foreground">{selectedLog.basalTemp} °C</span></li>}
             {selectedLog.notes && <li className="pt-1 text-muted-foreground italic">"{selectedLog.notes}"</li>}
           </ul>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">Sem registros neste dia.</p>
         )}
-      </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      </ScreenSection>
     </Screen>
   );
 }

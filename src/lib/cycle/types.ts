@@ -19,6 +19,7 @@ export interface DailyLog {
   crampsIntensity?: number; // 0-5
   sleepHours?: number;
   activityMinutes?: number;
+  weightKg?: number;
   sex?: { happened: boolean; protected?: boolean };
   basalTemp?: number; // °C
   medications?: string[];

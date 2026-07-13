@@ -4,6 +4,8 @@ import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { clearAll, exportAll, importAll, saveProfile } from "@/lib/cycle/storage";
+import { InfoTip } from "@/components/InfoTip";
+import type { FieldHelpId } from "@/lib/cycle/field-help";
 import { Moon, Sun, Download, Upload, Trash2, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
@@ -79,13 +81,13 @@ function SettingsPage() {
             placeholder="Adicionar"
           />
         </Field>
-        <Field label="Duração média do ciclo">
+        <Field label="Duração média do ciclo" helpId="cycleLength">
           <NumberInput value={profile.avgCycleLength} onChange={(v) => updateProfile("avgCycleLength", v)} suffix="d" />
         </Field>
-        <Field label="Duração média do período">
+        <Field label="Duração média do período" helpId="periodLength">
           <NumberInput value={profile.avgPeriodLength} onChange={(v) => updateProfile("avgPeriodLength", v)} suffix="d" />
         </Field>
-        <Field label="Regularidade">
+        <Field label="Regularidade" helpId="regularity">
           <select
             value={profile.cycleRegularity}
             onChange={(e) => updateProfile("cycleRegularity", e.target.value as "regular" | "irregular")}
@@ -104,7 +106,7 @@ function SettingsPage() {
       </Group>
 
       <Group title="Lembretes">
-        <Field label="Horário do lembrete diário" icon={<Bell size={18} />}>
+        <Field label="Horário do lembrete diário" icon={<Bell size={18} />} helpId="reminder">
           <input
             type="time"
             value={reminderTime}
@@ -155,14 +157,25 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function Field({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Field({
+  label,
+  icon,
+  helpId,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  helpId?: FieldHelpId;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3.5">
-      <span className="flex items-center gap-3 text-sm text-foreground">
-        {icon && <span className="text-muted-foreground">{icon}</span>}
-        {label}
+      <span className="flex min-w-0 items-center gap-2 text-sm text-foreground">
+        {icon && <span className="shrink-0 text-muted-foreground">{icon}</span>}
+        <span className="truncate">{label}</span>
+        {helpId && <InfoTip id={helpId} />}
       </span>
-      <div className="min-w-0 text-right">{children}</div>
+      <div className="min-w-0 shrink-0 text-right">{children}</div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { fadeUp, staggerContainer } from "@/lib/motion";
 
 export function Screen({
   title,
@@ -7,38 +8,81 @@ export function Screen({
   right,
   children,
   hidePad,
+  stagger = true,
 }: {
   title?: string;
   subtitle?: string;
   right?: ReactNode;
   children: ReactNode;
   hidePad?: boolean;
+  stagger?: boolean;
 }) {
-  return (
-    <motion.main
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-auto min-h-dvh w-full max-w-md pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]"
+  const content = stagger ? (
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className={hidePad ? "" : "px-5"}
     >
+      {children}
+    </motion.div>
+  ) : (
+    <div className={hidePad ? "" : "px-5"}>{children}</div>
+  );
+
+  return (
+    <main className="mx-auto min-h-dvh w-full max-w-md pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
       {(title || right) && (
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 px-6 pb-4">
+        <motion.header
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 px-6 pb-4"
+        >
           <div className="min-w-0">
             {subtitle && (
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <motion.p
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05, duration: 0.3 }}
+                className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground"
+              >
                 {subtitle}
-              </p>
+              </motion.p>
             )}
             {title && (
-              <h1 className="mt-1 truncate text-[34px] font-semibold leading-tight text-foreground">
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08, duration: 0.35 }}
+                className="mt-1 truncate text-[34px] font-semibold leading-tight text-foreground"
+              >
                 {title}
-              </h1>
+              </motion.h1>
             )}
           </div>
-          {right && <div className="shrink-0">{right}</div>}
-        </header>
+          {right && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 28 }}
+              className="shrink-0"
+            >
+              {right}
+            </motion.div>
+          )}
+        </motion.header>
       )}
-      <div className={hidePad ? "" : "px-5"}>{children}</div>
-    </motion.main>
+      {content}
+    </main>
+  );
+}
+
+/** Wrap a section inside Screen for staggered entrance */
+export function ScreenSection({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <motion.section variants={fadeUp} className={className}>
+      {children}
+    </motion.section>
   );
 }
