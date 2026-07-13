@@ -19,17 +19,18 @@ function copyServiceWorkerToClient(): Plugin {
     name: "copy-sw-to-client",
     enforce: "post",
     apply: "build",
-    async writeBundle(options) {
-      if (!options.dir) return;
-
-      const path = await import("node:path");
-      const target = path.resolve("dist/client");
-      if (path.resolve(options.dir) !== target) return;
-
+    async closeBundle() {
       const fs = await import("node:fs/promises");
+      const path = await import("node:path");
       const root = process.cwd();
       const srcDir = path.join(root, "dist");
       const destDir = path.join(root, "dist", "client");
+
+      try {
+        await fs.access(destDir);
+      } catch {
+        return;
+      }
 
       const entries = await fs.readdir(srcDir);
       for (const entry of entries) {
