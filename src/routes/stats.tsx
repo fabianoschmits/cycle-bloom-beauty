@@ -150,74 +150,111 @@ function StatsPage() {
           <Empty text="Registre seu humor no diário para ver o gráfico." />
         ) : (
           <>
-            <div className="mt-5 flex h-36 items-end gap-2">
+            {/* Emotion frequency — bars with high-contrast ink border/text */}
+            <div className="mt-5 flex h-40 items-end gap-2" role="list" aria-label="Frequência por humor">
               {moodCounts.map(({ mood, count }, i) => {
                 const meta = MOOD_META[mood];
                 const h = count === 0 ? 6 : (count / moodMax) * 100;
                 return (
-                  <div key={mood} className="flex flex-1 flex-col items-center gap-1">
-                    <span className="text-[10px] font-semibold text-foreground">
-                      {count > 0 ? count : ""}
-                    </span>
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${h}%` }}
-                      transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      className="w-full rounded-t-xl border border-border/40"
-                      style={{
-                        backgroundColor: meta.color,
-                        minHeight: 6,
-                        opacity: count === 0 ? 0.35 : 1,
-                      }}
-                      title={`${meta.label}: ${count}`}
-                    />
-                    <span className="text-base leading-none" aria-label={meta.label}>
-                      {meta.emoji}
-                    </span>
-                  </div>
+                  <MoodBarPopover key={mood} mood={mood} meta={meta} count={count} logs={logs}>
+                    <button
+                      type="button"
+                      className="group flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                      aria-label={`${meta.label}: ${count} registros. Toque para detalhes.`}
+                    >
+                      <span
+                        className="text-xs font-bold"
+                        style={{ color: count > 0 ? meta.ink : "var(--color-muted-foreground)" }}
+                      >
+                        {count > 0 ? count : "0"}
+                      </span>
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${h}%` }}
+                        transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="w-full rounded-t-xl border-2 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]"
+                        style={{
+                          backgroundColor: meta.color,
+                          borderColor: meta.ink,
+                          minHeight: 10,
+                          opacity: count === 0 ? 0.4 : 1,
+                        }}
+                      />
+                      <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
+                      <span className="sr-only">{meta.label}</span>
+                    </button>
+                  </MoodBarPopover>
                 );
               })}
             </div>
 
-            <div className="mt-5">
-              <div className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                Últimos 30 dias
+            {/* 30-day strip with phase ribbon + tap-to-detail */}
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-[11px] font-medium uppercase tracking-wider text-foreground">
+                  Últimos 30 dias
+                </div>
+                <div className="text-[10px] text-muted-foreground">Toque um dia para detalhes</div>
               </div>
               <div
-                className="grid gap-1"
+                className="grid gap-1.5"
                 style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}
               >
-                {last30.map((l, i) => {
-                  const meta = l?.mood ? MOOD_META[l.mood] : null;
-                  return (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-md border border-border/40"
-                      style={{
-                        backgroundColor: meta ? meta.color : "var(--color-secondary)",
-                        opacity: meta ? 1 : 0.6,
-                      }}
-                      title={l?.mood ? `${l.date} — ${MOOD_META[l.mood].label}` : l?.date}
-                    />
-                  );
-                })}
+                {last30.map((day, i) => (
+                  <DayCell key={i} day={day} />
+                ))}
+              </div>
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>{format(subDays(new Date(), 29), "d MMM", { locale: ptBR })}</span>
+                <span>hoje</span>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
-              {MOOD_ORDER.map((m) => (
-                <div key={m} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full border border-border/40"
-                    style={{ backgroundColor: MOOD_META[m].color }}
-                  />
-                  {MOOD_META[m].label}
+            {/* Legends */}
+            <div className="mt-5 space-y-3">
+              <div>
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Humor
                 </div>
-              ))}
+                <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+                  {MOOD_ORDER.map((m) => (
+                    <div key={m} className="flex items-center gap-1.5 text-[12px] text-foreground">
+                      <span
+                        className="h-3 w-3 rounded-full border-2"
+                        style={{
+                          backgroundColor: MOOD_META[m].color,
+                          borderColor: MOOD_META[m].ink,
+                        }}
+                        aria-hidden="true"
+                      />
+                      <span aria-hidden="true">{MOOD_META[m].emoji}</span>
+                      {MOOD_META[m].label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Ciclo
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+                  {(Object.keys(PHASE_META) as Array<Exclude<PhaseMark, null>>).map((p) => (
+                    <div key={p} className="flex items-center gap-1.5 text-[12px] text-foreground">
+                      <span
+                        className="h-1.5 w-5 rounded-full"
+                        style={{ backgroundColor: PHASE_META[p].color }}
+                        aria-hidden="true"
+                      />
+                      {PHASE_META[p].label}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </>
         )}
       </section>
+
 
 
       <Card title="Sintomas mais frequentes">
