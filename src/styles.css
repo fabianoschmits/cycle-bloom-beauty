@@ -39,6 +39,14 @@
   --color-phase-follicular: var(--phase-follicular);
   --color-phase-ovulation: var(--phase-ovulation);
   --color-phase-luteal: var(--phase-luteal);
+
+  --color-mood-calm: var(--mood-calm);
+  --color-mood-happy: var(--mood-happy);
+  --color-mood-sad: var(--mood-sad);
+  --color-mood-anxious: var(--mood-anxious);
+  --color-mood-irritable: var(--mood-irritable);
+  --color-mood-energetic: var(--mood-energetic);
+  --color-mood-tired: var(--mood-tired);
 }
 
 :root {
@@ -70,6 +78,15 @@
   --phase-follicular: oklch(0.78 0.13 90);
   --phase-ovulation: oklch(0.72 0.14 165);
   --phase-luteal: oklch(0.65 0.11 285);
+
+  /* Pastel mood palette — soft, matches phase tokens */
+  --mood-calm: oklch(0.88 0.06 220);
+  --mood-happy: oklch(0.92 0.09 95);
+  --mood-sad: oklch(0.82 0.05 255);
+  --mood-anxious: oklch(0.88 0.07 45);
+  --mood-irritable: oklch(0.86 0.08 20);
+  --mood-energetic: oklch(0.88 0.08 150);
+  --mood-tired: oklch(0.84 0.03 300);
 }
 
 .dark {
@@ -98,6 +115,14 @@
   --phase-follicular: oklch(0.83 0.12 90);
   --phase-ovulation: oklch(0.78 0.13 165);
   --phase-luteal: oklch(0.72 0.11 285);
+
+  --mood-calm: oklch(0.72 0.06 220);
+  --mood-happy: oklch(0.8 0.09 95);
+  --mood-sad: oklch(0.68 0.06 255);
+  --mood-anxious: oklch(0.76 0.08 45);
+  --mood-irritable: oklch(0.72 0.09 20);
+  --mood-energetic: oklch(0.76 0.09 150);
+  --mood-tired: oklch(0.7 0.03 300);
 }
 
 @layer base {
