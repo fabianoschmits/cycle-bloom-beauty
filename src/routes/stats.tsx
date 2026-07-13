@@ -309,7 +309,16 @@ type Day = {
   phase: PhaseMark;
 };
 
-function DayCell({ day }: { day: Day }) {
+type DayCellProps = {
+  day: Day;
+  tabIndex?: number;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  onFocus?: () => void;
+};
+const DayCell = forwardRef<HTMLButtonElement, DayCellProps>(function DayCell(
+  { day, tabIndex, onKeyDown, onFocus },
+  ref,
+) {
   const [open, setOpen] = useState(false);
   const meta = day.log?.mood ? MOOD_META[day.log.mood] : null;
   const phaseColor = day.phase ? PHASE_META[day.phase].color : null;
@@ -328,8 +337,13 @@ function DayCell({ day }: { day: Day }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          ref={ref}
           type="button"
-          className="relative flex aspect-square min-h-8 min-w-8 items-center justify-center overflow-hidden rounded-md border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
+          tabIndex={tabIndex}
+          onKeyDown={onKeyDown}
+          onFocus={onFocus}
+          role="gridcell"
+          className="relative flex aspect-square min-h-9 min-w-9 items-center justify-center overflow-hidden rounded-md border-2 outline-none transition focus-visible:z-10 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card data-[state=open]:ring-4 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-card"
           style={{
             backgroundColor: bg,
             borderColor: border,
@@ -337,6 +351,7 @@ function DayCell({ day }: { day: Day }) {
           }}
           aria-label={aria}
         >
+
           {phaseColor && (
             <span
               className="absolute inset-x-0 top-0 h-1"
