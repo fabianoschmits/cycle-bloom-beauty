@@ -33,6 +33,7 @@ function usePillTakenToday() {
 }
 
 function Today() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const { profile, insight, logs, ready } = useLuna();
   const pillTaken = usePillTakenToday();
