@@ -120,6 +120,7 @@ function RootComponent() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   useEffect(() => {
+    console.log("[PWA] registering service worker");
     registerPWA();
   }, []);
 
