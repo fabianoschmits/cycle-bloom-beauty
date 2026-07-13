@@ -20,6 +20,7 @@ function copyServiceWorkerToClient(): Plugin {
     enforce: "post",
     apply: "build",
     async writeBundle(options) {
+      console.log("[copy-sw-to-client] writeBundle called with dir:", options.dir);
       if (options.dir !== "dist/client") return;
 
       const fs = await import("node:fs/promises");
