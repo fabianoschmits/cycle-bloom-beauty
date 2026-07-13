@@ -87,7 +87,7 @@ function Article({ article, index }: { article: (typeof articles)[number]; index
         <motion.span animate={{ rotate: open ? 180 : 0 }} className="shrink-0 text-muted-foreground">
           <ChevronDown size={20} />
         </motion.span>
-      </button>
+      </motion.button>
       <motion.div
         initial={false}
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
