@@ -141,14 +141,14 @@
   --mood-energetic: oklch(0.76 0.09 150);
   --mood-tired: oklch(0.7 0.03 300);
 
-  /* Dark-mode ink variants: light text/borders on pastel fills */
-  --mood-calm-ink: oklch(0.96 0.02 220);
-  --mood-happy-ink: oklch(0.98 0.03 95);
-  --mood-sad-ink: oklch(0.96 0.02 255);
-  --mood-anxious-ink: oklch(0.98 0.03 45);
-  --mood-irritable-ink: oklch(0.98 0.03 20);
-  --mood-energetic-ink: oklch(0.98 0.03 150);
-  --mood-tired-ink: oklch(0.96 0.01 300);
+  /* Dark ink for pastel fills (pastel fills are still light-ish, so keep ink dark) */
+  --mood-calm-ink: oklch(0.28 0.08 220);
+  --mood-happy-ink: oklch(0.3 0.1 85);
+  --mood-sad-ink: oklch(0.28 0.09 255);
+  --mood-anxious-ink: oklch(0.3 0.12 45);
+  --mood-irritable-ink: oklch(0.32 0.14 20);
+  --mood-energetic-ink: oklch(0.3 0.11 150);
+  --mood-tired-ink: oklch(0.28 0.03 300);
 }
 
 @layer base {
