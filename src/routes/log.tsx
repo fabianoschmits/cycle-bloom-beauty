@@ -43,6 +43,7 @@ const symptoms: { value: Symptom; label: string }[] = [
 ];
 
 function LogPage() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [log, setLog] = useState<DailyLog>({ date });
