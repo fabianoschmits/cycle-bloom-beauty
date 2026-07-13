@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import {
   addDays, addMonths, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth,
   parseISO, startOfMonth, startOfWeek, endOfWeek,
