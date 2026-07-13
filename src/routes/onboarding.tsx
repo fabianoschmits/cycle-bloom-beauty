@@ -17,6 +17,7 @@ const steps = ["welcome", "name", "cycle", "lastPeriod", "regularity", "done"] a
 type Step = (typeof steps)[number];
 
 function Onboarding() {
+  useRegisterPWA();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("welcome");
   const [name, setName] = useState("");
