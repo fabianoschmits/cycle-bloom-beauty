@@ -140,6 +140,7 @@ function getPlatformLabel(ctx: InstallContext) {
 }
 
 export function InstallPrompt() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mounted, setMounted] = useState(false);
   const [ctx, setCtx] = useState<InstallContext | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
