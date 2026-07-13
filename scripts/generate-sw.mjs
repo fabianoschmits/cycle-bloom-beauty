@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { generateSW } from "workbox-build";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const publicDir = path.join(root, ".output/public");
-const assetsDir = path.join(publicDir, "assets");
+let publicDir = path.join(root, ".output/public");
+let assetsDir = path.join(publicDir, "assets");
 
 async function writeManifest() {
   const manifest = {
@@ -71,8 +71,15 @@ async function main() {
   try {
     await fs.access(publicDir);
   } catch {
-    console.error("[PWA] Missing .output/public — run vite build first.");
-    process.exit(1);
+    const vercelDir = path.join(root, ".vercel/output/static");
+    try {
+      await fs.access(vercelDir);
+      publicDir = vercelDir;
+      assetsDir = path.join(publicDir, "assets");
+    } catch {
+      console.error("[PWA] Missing build output directory (.output/public or .vercel/output/static) — run build first.");
+      process.exit(1);
+    }
   }
 
   const assets = await fs.readdir(assetsDir);
