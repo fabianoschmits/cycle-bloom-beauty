@@ -3,9 +3,21 @@ import { motion } from "framer-motion";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
 import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculations";
+import type { Mood } from "@/lib/cycle/types";
 import { differenceInDays, parseISO, subDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useMemo } from "react";
+
+const MOOD_META: Record<Mood, { label: string; emoji: string; color: string }> = {
+  calm: { label: "Calma", emoji: "😌", color: "var(--color-mood-calm)" },
+  happy: { label: "Feliz", emoji: "😊", color: "var(--color-mood-happy)" },
+  sad: { label: "Triste", emoji: "😢", color: "var(--color-mood-sad)" },
+  anxious: { label: "Ansiosa", emoji: "😰", color: "var(--color-mood-anxious)" },
+  irritable: { label: "Irritada", emoji: "😤", color: "var(--color-mood-irritable)" },
+  energetic: { label: "Enérgica", emoji: "⚡️", color: "var(--color-mood-energetic)" },
+  tired: { label: "Cansada", emoji: "🥱", color: "var(--color-mood-tired)" },
+};
+const MOOD_ORDER: Mood[] = ["calm", "happy", "energetic", "tired", "anxious", "irritable", "sad"];
 
 export const Route = createFileRoute("/stats")({
   component: StatsPage,
