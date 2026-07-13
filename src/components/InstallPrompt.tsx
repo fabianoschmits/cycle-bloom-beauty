@@ -139,12 +139,14 @@ function getPlatformLabel(ctx: InstallContext) {
 }
 
 export function InstallPrompt() {
+  const [mounted, setMounted] = useState(false);
   const [ctx, setCtx] = useState<InstallContext | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [dismissed, setDismissed] = useState(true);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setCtx(getInstallContext());
     try {
       setDismissed(localStorage.getItem(DISMISS_KEY) === "true");
@@ -161,6 +163,7 @@ export function InstallPrompt() {
     return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
   }, []);
 
+  if (!mounted) return null;
   if (!ctx) return null;
   if (ctx.isStandalone) return null;
   if (dismissed) return null;
