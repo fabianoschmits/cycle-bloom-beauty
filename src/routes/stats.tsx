@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculations";
 import type { DailyLog, Mood } from "@/lib/cycle/types";
 import { differenceInDays, parseISO, subDays, format } from "date-fns";
