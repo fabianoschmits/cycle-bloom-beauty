@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Screen } from "@/components/Screen";
+import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { getLog, saveLog } from "@/lib/cycle/storage";
 import type { DailyLog, Flow, Mood, Symptom } from "@/lib/cycle/types";
 import { format } from "date-fns";
