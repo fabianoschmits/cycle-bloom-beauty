@@ -18,6 +18,7 @@ export const Route = createFileRoute("/calendar")({
 });
 
 function CalendarPage() {
+  useRegisterPWA();
   const { profile, periodDays, logs } = useLuna();
   const [cursor, setCursor] = useState(startOfMonth(new Date()));
   const [selected, setSelected] = useState<Date>(new Date());
