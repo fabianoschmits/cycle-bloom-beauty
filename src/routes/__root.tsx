@@ -119,11 +119,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    registerPWA();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeInit />
-      <PWARegister />
       <div className="relative min-h-dvh bg-background text-foreground">
         <Outlet />
         {mounted && <BottomNav />}
