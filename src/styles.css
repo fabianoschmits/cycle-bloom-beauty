@@ -39,6 +39,14 @@
   --color-phase-follicular: var(--phase-follicular);
   --color-phase-ovulation: var(--phase-ovulation);
   --color-phase-luteal: var(--phase-luteal);
+
+  --color-mood-calm: var(--mood-calm);
+  --color-mood-happy: var(--mood-happy);
+  --color-mood-sad: var(--mood-sad);
+  --color-mood-anxious: var(--mood-anxious);
+  --color-mood-irritable: var(--mood-irritable);
+  --color-mood-energetic: var(--mood-energetic);
+  --color-mood-tired: var(--mood-tired);
 }
 
 :root {
