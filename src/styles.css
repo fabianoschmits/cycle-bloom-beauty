@@ -47,6 +47,14 @@
   --color-mood-irritable: var(--mood-irritable);
   --color-mood-energetic: var(--mood-energetic);
   --color-mood-tired: var(--mood-tired);
+
+  --color-mood-calm-ink: var(--mood-calm-ink);
+  --color-mood-happy-ink: var(--mood-happy-ink);
+  --color-mood-sad-ink: var(--mood-sad-ink);
+  --color-mood-anxious-ink: var(--mood-anxious-ink);
+  --color-mood-irritable-ink: var(--mood-irritable-ink);
+  --color-mood-energetic-ink: var(--mood-energetic-ink);
+  --color-mood-tired-ink: var(--mood-tired-ink);
 }
 
 :root {
