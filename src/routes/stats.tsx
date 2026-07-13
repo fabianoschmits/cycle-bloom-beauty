@@ -493,3 +493,125 @@ function MoodBarPopover({
   );
 }
 
+const DAY_COLS = 15;
+
+function DayGrid({ days }: { days: Day[] }) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [focused, setFocused] = useState(days.length - 1); // today by default
+
+  const focusIndex = (i: number) => {
+    const clamped = Math.max(0, Math.min(days.length - 1, i));
+    setFocused(clamped);
+    refs.current[clamped]?.focus();
+  };
+
+  const handleKey = (i: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    switch (e.key) {
+      case "ArrowRight": e.preventDefault(); focusIndex(i + 1); break;
+      case "ArrowLeft":  e.preventDefault(); focusIndex(i - 1); break;
+      case "ArrowDown":  e.preventDefault(); focusIndex(i + DAY_COLS); break;
+      case "ArrowUp":    e.preventDefault(); focusIndex(i - DAY_COLS); break;
+      case "Home":       e.preventDefault(); focusIndex(0); break;
+      case "End":        e.preventDefault(); focusIndex(days.length - 1); break;
+    }
+  };
+
+  return (
+    <div
+      role="grid"
+      aria-label="Últimos 30 dias — humor e fase do ciclo"
+      aria-rowcount={Math.ceil(days.length / DAY_COLS)}
+      aria-colcount={DAY_COLS}
+      className="grid gap-1.5"
+      style={{ gridTemplateColumns: `repeat(${DAY_COLS}, minmax(0, 1fr))` }}
+    >
+      {days.map((day, i) => (
+        <DayCell
+          key={i}
+          day={day}
+          ref={(el) => { refs.current[i] = el; }}
+          tabIndex={i === focused ? 0 : -1}
+          onKeyDown={handleKey(i)}
+          onFocus={() => setFocused(i)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MoodBarsRow({
+  moodCounts,
+  moodMax,
+  logs,
+}: {
+  moodCounts: Array<{ mood: Mood; count: number }>;
+  moodMax: number;
+  logs: Record<string, DailyLog>;
+}) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [focused, setFocused] = useState(0);
+  const total = moodCounts.length;
+
+  const focusIndex = (i: number) => {
+    const clamped = (i + total) % total;
+    setFocused(clamped);
+    refs.current[clamped]?.focus();
+  };
+
+  const handleKey = (i: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    switch (e.key) {
+      case "ArrowRight": e.preventDefault(); focusIndex(i + 1); break;
+      case "ArrowLeft":  e.preventDefault(); focusIndex(i - 1); break;
+      case "Home":       e.preventDefault(); focusIndex(0); break;
+      case "End":        e.preventDefault(); focusIndex(total - 1); break;
+    }
+  };
+
+  return (
+    <div
+      role="toolbar"
+      aria-label="Frequência por humor — setas para navegar"
+      className="mt-5 flex h-40 items-end gap-2"
+    >
+      {moodCounts.map(({ mood, count }, i) => {
+        const meta = MOOD_META[mood];
+        const h = count === 0 ? 6 : (count / moodMax) * 100;
+        return (
+          <MoodBarPopover key={mood} mood={mood} meta={meta} count={count} logs={logs}>
+            <button
+              ref={(el) => { refs.current[i] = el; }}
+              type="button"
+              tabIndex={i === focused ? 0 : -1}
+              onKeyDown={handleKey(i)}
+              onFocus={() => setFocused(i)}
+              className="group flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md outline-none transition focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card data-[state=open]:ring-4 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-card"
+              aria-label={`${meta.label}: ${count} ${count === 1 ? "registro" : "registros"}. Enter para detalhes.`}
+            >
+              <span
+                className="text-xs font-bold"
+                style={{ color: count > 0 ? meta.ink : "var(--color-muted-foreground)" }}
+              >
+                {count > 0 ? count : "0"}
+              </span>
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${h}%` }}
+                transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full rounded-t-xl border-2 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]"
+                style={{
+                  backgroundColor: meta.color,
+                  borderColor: meta.ink,
+                  minHeight: 10,
+                  opacity: count === 0 ? 0.4 : 1,
+                }}
+              />
+              <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
+              <span className="sr-only">{meta.label}</span>
+            </button>
+          </MoodBarPopover>
+        );
+      })}
+    </div>
+  );
+}
+
