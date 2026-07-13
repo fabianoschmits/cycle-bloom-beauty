@@ -54,6 +54,17 @@ function StatsPage() {
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }, [logs]);
 
+  const moodCounts = useMemo(() => {
+    const map = new Map<Mood, number>();
+    Object.values(logs).forEach((l) => {
+      if (l.mood) map.set(l.mood, (map.get(l.mood) ?? 0) + 1);
+    });
+    return MOOD_ORDER.map((m) => ({ mood: m, count: map.get(m) ?? 0 }));
+  }, [logs]);
+  const moodTotal = moodCounts.reduce((a, b) => a + b.count, 0);
+  const moodMax = Math.max(1, ...moodCounts.map((m) => m.count));
+  const dominantMood = moodTotal > 0 ? [...moodCounts].sort((a, b) => b.count - a.count)[0].mood : null;
+
   const totalLogs = Object.keys(logs).length;
 
   return (
