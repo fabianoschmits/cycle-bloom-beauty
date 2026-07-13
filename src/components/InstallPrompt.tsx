@@ -217,13 +217,10 @@ export function InstallPrompt() {
               Acesse mais rápido, use offline e tenha o app como se fosse nativo.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button size="sm" onClick={handleInstall} className="rounded-full">
-                {deferredPrompt ? "Instalar agora" : "Como instalar"}
-              </Button>
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                  <Button size="sm" variant="ghost" className="rounded-full text-muted-foreground">
-                    Ver tutorial
+                  <Button size="sm" className="rounded-full">
+                    {deferredPrompt ? "Instalar agora" : "Ver como instalar"}
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </SheetTrigger>
@@ -250,7 +247,14 @@ export function InstallPrompt() {
                   </ol>
                   <SheetFooter className="mt-6">
                     <SheetClose asChild>
-                      <Button className="w-full rounded-full" onClick={handleInstall}>
+                      <Button
+                        className="w-full rounded-full"
+                        onClick={() => {
+                          if (deferredPrompt) {
+                            handleInstall();
+                          }
+                        }}
+                      >
                         {deferredPrompt ? "Instalar agora" : "Entendi"}
                       </Button>
                     </SheetClose>
