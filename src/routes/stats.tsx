@@ -46,9 +46,28 @@ function StatsPage() {
   }, [starts]);
 
   const last30 = useMemo(() => {
-    const days = Array.from({ length: 30 }, (_, i) => format(subDays(new Date(), 29 - i), "yyyy-MM-dd"));
-    return days.map((d) => logs[d]);
-  }, [logs]);
+    const cycleLen = avgCycle;
+    const periodLen = profile?.avgPeriodLength ?? 5;
+    const sortedStarts = [...starts].sort();
+    return Array.from({ length: 30 }, (_, i) => {
+      const dateObj = subDays(new Date(), 29 - i);
+      const date = format(dateObj, "yyyy-MM-dd");
+      // find the most recent period start on or before this date
+      let cycleStart: string | null = null;
+      for (let k = sortedStarts.length - 1; k >= 0; k--) {
+        if (sortedStarts[k] <= date) { cycleStart = sortedStarts[k]; break; }
+      }
+      let phase: PhaseMark = null;
+      if (cycleStart) {
+        const dayOfCycle = differenceInDays(dateObj, parseISO(cycleStart)) + 1;
+        const ovulationDay = cycleLen - 14;
+        if (dayOfCycle >= 1 && dayOfCycle <= periodLen) phase = "menstrual";
+        else if (dayOfCycle === ovulationDay) phase = "ovulation";
+        else if (dayOfCycle >= ovulationDay - 5 && dayOfCycle <= ovulationDay + 1) phase = "fertile";
+      }
+      return { date, dateObj, log: logs[date] as DailyLog | undefined, phase };
+    });
+  }, [logs, starts, avgCycle, profile?.avgPeriodLength]);
 
   // Symptom frequency
   const symptomCounts = useMemo(() => {
