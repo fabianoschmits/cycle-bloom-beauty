@@ -27,7 +27,6 @@ function copyServiceWorkerToClient(): Plugin {
       if (path.resolve(options.dir) !== target) return;
 
       const fs = await import("node:fs/promises");
-      const path = await import("node:path");
       const root = process.cwd();
       const srcDir = path.join(root, "dist");
       const destDir = path.join(root, "dist", "client");
