@@ -95,6 +95,15 @@
   --mood-irritable: oklch(0.86 0.08 20);
   --mood-energetic: oklch(0.88 0.08 150);
   --mood-tired: oklch(0.84 0.03 300);
+
+  /* Darker "ink" variants for borders + text on pastel fills (WCAG AA on card) */
+  --mood-calm-ink: oklch(0.42 0.09 220);
+  --mood-happy-ink: oklch(0.45 0.12 85);
+  --mood-sad-ink: oklch(0.4 0.09 255);
+  --mood-anxious-ink: oklch(0.45 0.13 45);
+  --mood-irritable-ink: oklch(0.45 0.15 20);
+  --mood-energetic-ink: oklch(0.42 0.11 150);
+  --mood-tired-ink: oklch(0.4 0.03 300);
 }
 
 .dark {
