@@ -12,6 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
+import { InstallPrompt } from "../components/InstallPrompt";
 import { registerPWA } from "../lib/pwa-register";
 
 function NotFoundComponent() {
