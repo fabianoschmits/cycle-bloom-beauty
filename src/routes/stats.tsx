@@ -4,9 +4,9 @@ import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
 import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculations";
 import type { DailyLog, Mood } from "@/lib/cycle/types";
-import { addDays, differenceInDays, parseISO, subDays, format } from "date-fns";
+import { differenceInDays, parseISO, subDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type MoodMeta = { label: string; emoji: string; color: string; ink: string };
