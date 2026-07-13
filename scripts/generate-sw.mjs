@@ -29,7 +29,7 @@ async function writeManifest() {
   await fs.writeFile(path.join(publicDir, "manifest.webmanifest"), JSON.stringify(manifest, null, 2), "utf8");
 }
 
-async function writeAppShell(indexJs: string, stylesCss: string) {
+async function writeAppShell(indexJs, stylesCss) {
   const shell = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
