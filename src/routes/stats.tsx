@@ -179,9 +179,6 @@ function StatsPage() {
                 </div>
               </div>
               <DayGrid days={last30} />
-            </div>
-
-              </div>
               <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
                 <span>{format(subDays(new Date(), 29), "d MMM", { locale: ptBR })}</span>
                 <span>hoje</span>
