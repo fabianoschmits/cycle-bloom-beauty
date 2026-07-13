@@ -4,9 +4,9 @@ import { Screen } from "@/components/Screen";
 import { useLuna } from "@/hooks/useLuna";
 import { detectPeriodStarts, avgCycleFromHistory } from "@/lib/cycle/calculations";
 import type { DailyLog, Mood } from "@/lib/cycle/types";
-import { addDays, differenceInDays, parseISO, subDays, format } from "date-fns";
+import { differenceInDays, parseISO, subDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useMemo, useState } from "react";
+import { forwardRef, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type MoodMeta = { label: string; emoji: string; color: string; ink: string };
@@ -46,26 +46,41 @@ function StatsPage() {
   }, [starts]);
 
   const last30 = useMemo(() => {
-    const cycleLen = avgCycle;
+    const cycleLen = Math.max(15, avgCycle);
     const periodLen = profile?.avgPeriodLength ?? 5;
     const sortedStarts = [...starts].sort();
     return Array.from({ length: 30 }, (_, i) => {
       const dateObj = subDays(new Date(), 29 - i);
       const date = format(dateObj, "yyyy-MM-dd");
-      // find the most recent period start on or before this date
-      let cycleStart: string | null = null;
+      const log = logs[date] as DailyLog | undefined;
+
+      // Anchor to most recent past period start (roll forward projected cycles
+      // if the newest start is older than one cycle length).
+      let anchor: string | null = null;
       for (let k = sortedStarts.length - 1; k >= 0; k--) {
-        if (sortedStarts[k] <= date) { cycleStart = sortedStarts[k]; break; }
+        if (sortedStarts[k] <= date) { anchor = sortedStarts[k]; break; }
       }
       let phase: PhaseMark = null;
-      if (cycleStart) {
-        const dayOfCycle = differenceInDays(dateObj, parseISO(cycleStart)) + 1;
+      if (anchor) {
+        const rawDoc = differenceInDays(dateObj, parseISO(anchor)) + 1;
+        // Project forward one or more full cycles when no newer start exists yet.
+        const projectedCycles = rawDoc > cycleLen ? Math.floor((rawDoc - 1) / cycleLen) : 0;
+        const dayOfCycle = rawDoc - projectedCycles * cycleLen;
         const ovulationDay = cycleLen - 14;
+        const isProjected = projectedCycles > 0;
+
         if (dayOfCycle >= 1 && dayOfCycle <= periodLen) phase = "menstrual";
         else if (dayOfCycle === ovulationDay) phase = "ovulation";
         else if (dayOfCycle >= ovulationDay - 5 && dayOfCycle <= ovulationDay + 1) phase = "fertile";
+
+        // Never predict menstruation from projection if the user already logged
+        // an actual flow-free day — respect the record as ground truth.
+        if (phase === "menstrual" && isProjected && log && !log.flow) phase = null;
       }
-      return { date, dateObj, log: logs[date] as DailyLog | undefined, phase };
+      // Actual logged flow always wins over any projection.
+      if (log?.flow) phase = "menstrual";
+
+      return { date, dateObj, log, phase };
     });
   }, [logs, starts, avgCycle, profile?.avgPeriodLength]);
 
@@ -151,42 +166,7 @@ function StatsPage() {
         ) : (
           <>
             {/* Emotion frequency — bars with high-contrast ink border/text */}
-            <div className="mt-5 flex h-40 items-end gap-2" role="list" aria-label="Frequência por humor">
-              {moodCounts.map(({ mood, count }, i) => {
-                const meta = MOOD_META[mood];
-                const h = count === 0 ? 6 : (count / moodMax) * 100;
-                return (
-                  <MoodBarPopover key={mood} mood={mood} meta={meta} count={count} logs={logs}>
-                    <button
-                      type="button"
-                      className="group flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-                      aria-label={`${meta.label}: ${count} registros. Toque para detalhes.`}
-                    >
-                      <span
-                        className="text-xs font-bold"
-                        style={{ color: count > 0 ? meta.ink : "var(--color-muted-foreground)" }}
-                      >
-                        {count > 0 ? count : "0"}
-                      </span>
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full rounded-t-xl border-2 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]"
-                        style={{
-                          backgroundColor: meta.color,
-                          borderColor: meta.ink,
-                          minHeight: 10,
-                          opacity: count === 0 ? 0.4 : 1,
-                        }}
-                      />
-                      <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
-                      <span className="sr-only">{meta.label}</span>
-                    </button>
-                  </MoodBarPopover>
-                );
-              })}
-            </div>
+            <MoodBarsRow moodCounts={moodCounts} moodMax={moodMax} logs={logs} />
 
             {/* 30-day strip with phase ribbon + tap-to-detail */}
             <div className="mt-6">
@@ -194,16 +174,11 @@ function StatsPage() {
                 <div className="text-[11px] font-medium uppercase tracking-wider text-foreground">
                   Últimos 30 dias
                 </div>
-                <div className="text-[10px] text-muted-foreground">Toque um dia para detalhes</div>
+                <div className="text-[10px] text-muted-foreground">
+                  Setas para navegar · Enter para detalhes
+                </div>
               </div>
-              <div
-                className="grid gap-1.5"
-                style={{ gridTemplateColumns: "repeat(15, minmax(0, 1fr))" }}
-              >
-                {last30.map((day, i) => (
-                  <DayCell key={i} day={day} />
-                ))}
-              </div>
+              <DayGrid days={last30} />
               <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
                 <span>{format(subDays(new Date(), 29), "d MMM", { locale: ptBR })}</span>
                 <span>hoje</span>
@@ -334,7 +309,16 @@ type Day = {
   phase: PhaseMark;
 };
 
-function DayCell({ day }: { day: Day }) {
+type DayCellProps = {
+  day: Day;
+  tabIndex?: number;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  onFocus?: () => void;
+};
+const DayCell = forwardRef<HTMLButtonElement, DayCellProps>(function DayCell(
+  { day, tabIndex, onKeyDown, onFocus },
+  ref,
+) {
   const [open, setOpen] = useState(false);
   const meta = day.log?.mood ? MOOD_META[day.log.mood] : null;
   const phaseColor = day.phase ? PHASE_META[day.phase].color : null;
@@ -353,8 +337,13 @@ function DayCell({ day }: { day: Day }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          ref={ref}
           type="button"
-          className="relative flex aspect-square min-h-8 min-w-8 items-center justify-center overflow-hidden rounded-md border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
+          tabIndex={tabIndex}
+          onKeyDown={onKeyDown}
+          onFocus={onFocus}
+          role="gridcell"
+          className="relative flex aspect-square min-h-9 min-w-9 items-center justify-center overflow-hidden rounded-md border-2 outline-none transition focus-visible:z-10 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card data-[state=open]:ring-4 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-card"
           style={{
             backgroundColor: bg,
             borderColor: border,
@@ -362,6 +351,7 @@ function DayCell({ day }: { day: Day }) {
           }}
           aria-label={aria}
         >
+
           {phaseColor && (
             <span
               className="absolute inset-x-0 top-0 h-1"
@@ -442,7 +432,7 @@ function DayCell({ day }: { day: Day }) {
       </PopoverContent>
     </Popover>
   );
-}
+});
 
 function MoodBarPopover({
   mood,
@@ -500,6 +490,128 @@ function MoodBarPopover({
         )}
       </PopoverContent>
     </Popover>
+  );
+}
+
+const DAY_COLS = 15;
+
+function DayGrid({ days }: { days: Day[] }) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [focused, setFocused] = useState(days.length - 1); // today by default
+
+  const focusIndex = (i: number) => {
+    const clamped = Math.max(0, Math.min(days.length - 1, i));
+    setFocused(clamped);
+    refs.current[clamped]?.focus();
+  };
+
+  const handleKey = (i: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    switch (e.key) {
+      case "ArrowRight": e.preventDefault(); focusIndex(i + 1); break;
+      case "ArrowLeft":  e.preventDefault(); focusIndex(i - 1); break;
+      case "ArrowDown":  e.preventDefault(); focusIndex(i + DAY_COLS); break;
+      case "ArrowUp":    e.preventDefault(); focusIndex(i - DAY_COLS); break;
+      case "Home":       e.preventDefault(); focusIndex(0); break;
+      case "End":        e.preventDefault(); focusIndex(days.length - 1); break;
+    }
+  };
+
+  return (
+    <div
+      role="grid"
+      aria-label="Últimos 30 dias — humor e fase do ciclo"
+      aria-rowcount={Math.ceil(days.length / DAY_COLS)}
+      aria-colcount={DAY_COLS}
+      className="grid gap-1.5"
+      style={{ gridTemplateColumns: `repeat(${DAY_COLS}, minmax(0, 1fr))` }}
+    >
+      {days.map((day, i) => (
+        <DayCell
+          key={i}
+          day={day}
+          ref={(el) => { refs.current[i] = el; }}
+          tabIndex={i === focused ? 0 : -1}
+          onKeyDown={handleKey(i)}
+          onFocus={() => setFocused(i)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MoodBarsRow({
+  moodCounts,
+  moodMax,
+  logs,
+}: {
+  moodCounts: Array<{ mood: Mood; count: number }>;
+  moodMax: number;
+  logs: Record<string, DailyLog>;
+}) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [focused, setFocused] = useState(0);
+  const total = moodCounts.length;
+
+  const focusIndex = (i: number) => {
+    const clamped = (i + total) % total;
+    setFocused(clamped);
+    refs.current[clamped]?.focus();
+  };
+
+  const handleKey = (i: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    switch (e.key) {
+      case "ArrowRight": e.preventDefault(); focusIndex(i + 1); break;
+      case "ArrowLeft":  e.preventDefault(); focusIndex(i - 1); break;
+      case "Home":       e.preventDefault(); focusIndex(0); break;
+      case "End":        e.preventDefault(); focusIndex(total - 1); break;
+    }
+  };
+
+  return (
+    <div
+      role="toolbar"
+      aria-label="Frequência por humor — setas para navegar"
+      className="mt-5 flex h-40 items-end gap-2"
+    >
+      {moodCounts.map(({ mood, count }, i) => {
+        const meta = MOOD_META[mood];
+        const h = count === 0 ? 6 : (count / moodMax) * 100;
+        return (
+          <MoodBarPopover key={mood} mood={mood} meta={meta} count={count} logs={logs}>
+            <button
+              ref={(el) => { refs.current[i] = el; }}
+              type="button"
+              tabIndex={i === focused ? 0 : -1}
+              onKeyDown={handleKey(i)}
+              onFocus={() => setFocused(i)}
+              className="group flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md outline-none transition focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card data-[state=open]:ring-4 data-[state=open]:ring-ring data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-card"
+              aria-label={`${meta.label}: ${count} ${count === 1 ? "registro" : "registros"}. Enter para detalhes.`}
+            >
+              <span
+                className="text-xs font-bold"
+                style={{ color: count > 0 ? meta.ink : "var(--color-muted-foreground)" }}
+              >
+                {count > 0 ? count : "0"}
+              </span>
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${h}%` }}
+                transition={{ delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full rounded-t-xl border-2 transition-transform group-hover:scale-[1.02] group-active:scale-[0.98]"
+                style={{
+                  backgroundColor: meta.color,
+                  borderColor: meta.ink,
+                  minHeight: 10,
+                  opacity: count === 0 ? 0.4 : 1,
+                }}
+              />
+              <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
+              <span className="sr-only">{meta.label}</span>
+            </button>
+          </MoodBarPopover>
+        );
+      })}
+    </div>
   );
 }
 
