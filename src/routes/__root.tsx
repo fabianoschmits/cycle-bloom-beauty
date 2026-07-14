@@ -27,6 +27,15 @@ if (typeof window !== "undefined") {
       msg.includes("Hydration") ||
       msg.includes("Minified React error")
     ) {
+      // Prevent reload loops (max once per 15 seconds)
+      const lastReload = sessionStorage.getItem("luna.pwa.lastReload");
+      const now = Date.now();
+      if (lastReload && now - parseInt(lastReload, 10) < 15000) {
+        console.error("[PWA] Self-healing skipped to prevent infinite reload loop.");
+        return;
+      }
+      sessionStorage.setItem("luna.pwa.lastReload", String(now));
+
       console.warn("[PWA] Critical error detected. Clearing PWA caches to self-heal...");
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
