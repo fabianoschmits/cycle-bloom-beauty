@@ -9,7 +9,7 @@ import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { phaseInfo } from "@/lib/cycle/calculations";
 import { getPillRecords } from "@/lib/cycle/pill";
 import { nativeEase, springSoft } from "@/lib/motion";
-import { format, parseISO } from "date-fns";
+import { addDays, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Settings, ChevronRight } from "lucide-react";
 
@@ -35,12 +35,14 @@ function Today() {
   const todayLog = logs[todayKey];
   const phase = insight?.currentPhase ?? "follicular";
   const p = phaseInfo[phase];
-  const pillTaken = Boolean(getPillRecords()[todayKey]);
+  const pillRecords = getPillRecords();
+  const pillTaken = Boolean(pillRecords[todayKey]);
 
   const daysUntil = insight?.daysUntilPeriod ?? null;
   const cycleDay = insight?.dayOfCycle ?? 1;
   const cycleLen = profile.avgCycleLength;
   const progress = Math.min(1, cycleDay / cycleLen);
+  const lastPeriodStart = profile.lastPeriodStart ?? todayKey;
 
   return (
     <Screen
@@ -59,7 +61,15 @@ function Today() {
       }
     >
       <ScreenSection className="relative mx-auto flex aspect-square w-full max-w-[260px] items-center justify-center">
-        <CycleRing progress={progress} color={p.color} pillTaken={pillTaken} />
+        <CycleRing
+          progress={progress}
+          color={p.color}
+          pillTaken={pillTaken}
+          pillRecords={pillRecords}
+          cycleDay={cycleDay}
+          cycleLen={cycleLen}
+          lastPeriodStart={lastPeriodStart}
+        />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
           <motion.span
             key={cycleDay}
@@ -130,30 +140,71 @@ function Today() {
   );
 }
 
-function CycleRing({ progress, color, pillTaken }: { progress: number; color: string; pillTaken?: boolean }) {
+function CycleRing({
+  progress,
+  color,
+  pillRecords,
+  cycleDay,
+  cycleLen,
+  lastPeriodStart,
+}: {
+  progress: number;
+  color: string;
+  pillTaken?: boolean;
+  pillRecords: Record<string, { date: string }>;
+  cycleDay: number;
+  cycleLen: number;
+  lastPeriodStart: string;
+}) {
   const size = 260;
   const stroke = 12;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const cx = size / 2;
   const cy = size / 2;
-  const angle = 2 * Math.PI * progress;
-  const dotX = cx + r * Math.cos(angle);
-  const dotY = cy + r * Math.sin(angle);
+
+  // Generate dot positions for each day of the cycle (1 … cycleLen)
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const startDate = parseISO(lastPeriodStart);
+
+  const dots = Array.from({ length: cycleLen }, (_, i) => {
+    const dayNum = i + 1; // 1-based
+    const angle = (2 * Math.PI * i) / cycleLen - Math.PI / 2; // start at top
+    const dotX = cx + r * Math.cos(angle);
+    const dotY = cy + r * Math.sin(angle);
+    const dateStr = format(addDays(startDate, i), "yyyy-MM-dd");
+    const isPast = dateStr < todayStr;
+    const isToday = dateStr === todayStr;
+    const isFuture = dateStr > todayStr;
+    const taken = Boolean(pillRecords[dateStr]);
+    const inCycle = dayNum <= cycleDay; // days up to today in this cycle
+
+    return { dayNum, dotX, dotY, taken, isPast, isToday, isFuture, inCycle, dateStr };
+  });
+
+  const progressAngle = 2 * Math.PI * progress;
+  const progressDotX = cx + r * Math.cos(progressAngle);
+  const progressDotY = cy + r * Math.sin(progressAngle);
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
+    <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full">
       <defs>
         <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.9" />
           <stop offset="100%" stopColor={color} stopOpacity="0.4" />
         </linearGradient>
       </defs>
-      <circle cx={cx} cy={cy} r={r} stroke="var(--color-border)" strokeWidth={stroke} fill="none" />
+
+      {/* Background track */}
+      <circle
+        cx={cx} cy={cy} r={r}
+        stroke="var(--color-border)" strokeWidth={stroke} fill="none"
+        transform={`rotate(-90 ${cx} ${cy})`}
+      />
+
+      {/* Progress arc */}
       <motion.circle
-        cx={cx}
-        cy={cy}
-        r={r}
+        cx={cx} cy={cy} r={r}
         stroke="url(#ringGrad)"
         strokeWidth={stroke}
         strokeLinecap="round"
@@ -162,34 +213,63 @@ function CycleRing({ progress, color, pillTaken }: { progress: number; color: st
         initial={{ strokeDashoffset: c }}
         animate={{ strokeDashoffset: c * (1 - progress) }}
         transition={{ duration: 1.1, ease: nativeEase }}
+        transform={`rotate(-90 ${cx} ${cy})`}
       />
-      {pillTaken && (
-        <g>
-          <motion.circle
-            cx={dotX}
-            cy={dotY}
-            r={9}
-            fill="rgb(16 185 129)"
-            fillOpacity={0.2}
-            initial={{ scale: 0 }}
-            animate={{ scale: [0, 1.5, 1] }}
-            transition={{ duration: 0.55, ease: nativeEase }}
-            style={{ transformOrigin: `${dotX}px ${dotY}px` }}
-          />
-          <motion.circle
-            cx={dotX}
-            cy={dotY}
-            r={4.5}
-            fill="rgb(16 185 129)"
-            stroke="var(--color-background)"
-            strokeWidth={2}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1, ...springSoft }}
-            style={{ transformOrigin: `${dotX}px ${dotY}px` }}
-          />
-        </g>
-      )}
+
+      {/* Per-day pill history dots */}
+      {dots.map(({ dayNum, dotX, dotY, taken, isPast, isToday, isFuture, inCycle }) => {
+        if (isFuture) return null; // no dot for future days
+        const missed = !taken && (isPast || isToday) && inCycle;
+        const green = taken && inCycle;
+
+        if (!green && !missed) return null;
+
+        return (
+          <g key={dayNum}>
+            {/* Glow ring */}
+            {green && (
+              <motion.circle
+                cx={dotX} cy={dotY} r={6}
+                fill="rgb(16 185 129)"
+                fillOpacity={0.18}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: dayNum * 0.015, duration: 0.3, ease: nativeEase }}
+                style={{ transformOrigin: `${dotX}px ${dotY}px` }}
+              />
+            )}
+            {/* Core dot */}
+            <motion.circle
+              cx={dotX} cy={dotY}
+              r={3.5}
+              fill={green ? "rgb(16 185 129)" : "rgb(239 68 68)"}
+              stroke="var(--color-background)"
+              strokeWidth={1.5}
+              initial={{ scale: 0 }}
+              animate={missed ? { scale: [1, 1.3, 1], opacity: [1, 0.4, 1] } : { scale: 1 }}
+              transition={
+                missed
+                  ? { repeat: Infinity, duration: 1.8, ease: "easeInOut", delay: dayNum * 0.01 }
+                  : { delay: dayNum * 0.015, ...springSoft }
+              }
+              style={{ transformOrigin: `${dotX}px ${dotY}px` }}
+            />
+          </g>
+        );
+      })}
+
+      {/* Current day progress dot (white) */}
+      <motion.circle
+        cx={progressDotX} cy={progressDotY} r={5}
+        fill="white"
+        stroke={color}
+        strokeWidth={2}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.8, ...springSoft }}
+        transform={`rotate(-90 ${cx} ${cy})`}
+        style={{ transformOrigin: `${progressDotX}px ${progressDotY}px` }}
+      />
     </svg>
   );
 }

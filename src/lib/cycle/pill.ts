@@ -28,10 +28,25 @@ export function takePillNow(): PillRecord {
   return record;
 }
 
+/** Register pill taken on a specific date (retroactive). Uses noon as time if not provided. */
+export function takePillOnDate(date: string, time = "12:00"): PillRecord {
+  const record: PillRecord = { date, time, takenAt: new Date(`${date}T${time}:00`).toISOString() };
+  const all = getPillRecords();
+  all[date] = record;
+  localStorage.setItem(PILL_KEY, JSON.stringify(all));
+  window.dispatchEvent(new Event(PILL_UPDATE));
+  return record;
+}
+
 export function undoPillToday() {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  undoPillOnDate(date);
+}
+
+/** Remove pill record for a specific date. */
+export function undoPillOnDate(date: string) {
   const all = getPillRecords();
   delete all[date];
   localStorage.setItem(PILL_KEY, JSON.stringify(all));

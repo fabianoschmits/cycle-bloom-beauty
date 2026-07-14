@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Screen, ScreenSection } from "@/components/Screen";
 import { Pressable } from "@/components/Pressable";
 import { useLuna } from "@/hooks/useLuna";
@@ -8,12 +8,14 @@ import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { hapticLight, nativeEase, springSnappy } from "@/lib/motion";
 import {
   addDays, addMonths, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth,
-  parseISO, startOfMonth, startOfWeek, endOfWeek,
+  parseISO, startOfMonth, startOfWeek, endOfWeek, isAfter, startOfDay,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pill } from "lucide-react";
 import { removePeriodDay, saveLog } from "@/lib/cycle/storage";
 import { computeInsight, phaseInfo } from "@/lib/cycle/calculations";
+import { getPillRecords, takePillOnDate, undoPillOnDate } from "@/lib/cycle/pill";
+import type { PillRecord } from "@/lib/cycle/pill";
 
 export const Route = createFileRoute("/calendar")({
   component: CalendarPage,
@@ -24,6 +26,15 @@ function CalendarPage() {
   const { profile, periodDays, logs } = useLuna();
   const [cursor, setCursor] = useState(startOfMonth(new Date()));
   const [selected, setSelected] = useState<Date>(new Date());
+  const [pillRecords, setPillRecords] = useState<Record<string, PillRecord>>(
+    () => getPillRecords()
+  );
+
+  useEffect(() => {
+    const refresh = () => setPillRecords(getPillRecords());
+    window.addEventListener("luna:pill-update", refresh);
+    return () => window.removeEventListener("luna:pill-update", refresh);
+  }, []);
 
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 0 });
@@ -42,6 +53,9 @@ function CalendarPage() {
   const selectedKey = format(selected, "yyyy-MM-dd");
   const selectedLog = logs[selectedKey];
   const isPeriod = periodSet.has(selectedKey);
+  const pillTaken = Boolean(pillRecords[selectedKey]);
+  // Only allow pill toggle for today or past days
+  const canMarkPill = !isAfter(startOfDay(selected), startOfDay(new Date()));
 
   function togglePeriod() {
     hapticLight();
@@ -49,6 +63,15 @@ function CalendarPage() {
       removePeriodDay(selectedKey);
     } else {
       saveLog({ date: selectedKey, flow: "medium" });
+    }
+  }
+
+  function togglePill() {
+    hapticLight();
+    if (pillTaken) {
+      undoPillOnDate(selectedKey);
+    } else {
+      takePillOnDate(selectedKey);
     }
   }
 
@@ -191,6 +214,55 @@ function CalendarPage() {
             {isPeriod ? "Menstruando" : "Marcar menstruação"}
           </Pressable>
         </div>
+
+        {/* Pill toggle */}
+        {canMarkPill && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: nativeEase }}
+            className="mt-3"
+          >
+            <Pressable
+              haptic
+              onClick={togglePill}
+              className="flex w-full items-center justify-between rounded-2xl px-4 py-3 transition-colors"
+              style={{
+                backgroundColor: pillTaken
+                  ? "color-mix(in oklab, rgb(16 185 129) 15%, var(--color-card))"
+                  : "var(--color-secondary)",
+                border: pillTaken ? "1px solid color-mix(in oklab, rgb(16 185 129) 35%, transparent)" : "1px solid transparent",
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="flex h-7 w-7 items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: pillTaken
+                      ? "rgb(16 185 129)"
+                      : "var(--color-muted-foreground)",
+                    opacity: pillTaken ? 1 : 0.35,
+                  }}
+                >
+                  <Pill size={14} color="white" />
+                </span>
+                <span className="text-sm font-medium text-foreground">
+                  {pillTaken ? "Pílula registrada" : "Marcar pílula tomada"}
+                </span>
+              </div>
+              {pillTaken && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="text-xs font-semibold"
+                  style={{ color: "rgb(16 185 129)" }}
+                >
+                  ✓
+                </motion.span>
+              )}
+            </Pressable>
+          </motion.div>
+        )}
         {selectedLog ? (
           <ul className="mt-4 space-y-1.5 text-sm text-foreground">
             {selectedLog.flow && <li>Fluxo: <span className="text-muted-foreground capitalize">{selectedLog.flow}</span></li>}
