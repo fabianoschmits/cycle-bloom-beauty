@@ -80,8 +80,6 @@ async function main() {
     globDirectory: publicDir,
     globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,webmanifest,woff2,ttf}"],
     globIgnores: ["**/server/**", "**/*.map", "sw.js", "workbox-*.js"],
-    navigateFallback: "/fallback.html",
-    navigateFallbackDenylist: [/^\/api\//, /^\/assets\//, /^\/sw\.js$/, /^\/workbox-/, /\.[^/]+$/],
     cleanupOutdatedCaches: true,
     clientsClaim: true,
     skipWaiting: true,
