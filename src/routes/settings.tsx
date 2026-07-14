@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Screen } from "@/components/Screen";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { useLuna } from "@/hooks/useLuna";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
 import { clearAll, exportAll, importAll, saveProfile } from "@/lib/cycle/storage";
@@ -68,7 +69,7 @@ function SettingsPage() {
     }
   }
 
-  if (!profile) return null;
+  if (!profile) return <LoadingScreen />;
 
   return (
     <Screen subtitle="Ajustes" title="Configurações">

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { Screen, ScreenSection } from "@/components/Screen";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { TodayRoutine } from "@/components/TodayRoutine";
 import { useLuna } from "@/hooks/useLuna";
 import { useRegisterPWA } from "@/hooks/useRegisterPWA";
@@ -27,7 +28,7 @@ function Today() {
     }
   }, [ready, profile, navigate]);
 
-  if (!ready || !profile) return null;
+  if (!ready || !profile) return <LoadingScreen />;
 
   const today = new Date();
   const todayKey = format(today, "yyyy-MM-dd");
