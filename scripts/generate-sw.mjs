@@ -91,7 +91,7 @@ async function main() {
         handler: "NetworkFirst",
         options: {
           cacheName: "luna-pages",
-          networkTimeoutSeconds: 3,
+          networkTimeoutSeconds: 10,
           expiration: {
             maxEntries: 50,
             maxAgeSeconds: 60 * 60 * 24 * 30,
