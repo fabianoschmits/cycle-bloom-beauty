@@ -9,7 +9,7 @@ import { getLog, saveLog } from "@/lib/cycle/storage";
 import type { DailyLog, Flow, Mood, Symptom } from "@/lib/cycle/types";
 import type { FieldHelpId } from "@/lib/cycle/field-help";
 import { hapticLight, hapticSuccess, springSnappy } from "@/lib/motion";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Check } from "lucide-react";
 
@@ -72,7 +72,7 @@ function LogPage() {
 
   return (
     <Screen
-      subtitle={format(new Date(date), "EEEE, d 'de' MMMM", { locale: ptBR })}
+      subtitle={format(parseISO(date), "EEEE, d 'de' MMMM", { locale: ptBR })}
       title="Registrar"
       right={
         <input

@@ -30,8 +30,9 @@ function Onboarding() {
   const [regular, setRegular] = useState<"regular" | "irregular">("regular");
 
   const idx = steps.indexOf(step);
-  const next = () => setStep(steps[Math.min(idx + 1, steps.length - 1)]);
-  const back = () => setStep(steps[Math.max(idx - 1, 0)]);
+  const [dir, setDir] = useState(1);
+  const next = () => { setDir(1); setStep(steps[Math.min(idx + 1, steps.length - 1)]); };
+  const back = () => { setDir(-1); setStep(steps[Math.max(idx - 1, 0)]); };
 
   function finish() {
     const profile: UserProfile = {
@@ -59,8 +60,6 @@ function Onboarding() {
     navigate({ to: "/" });
   }
 
-  const stepDirection = 1;
-
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
       <div className="mb-8 flex items-center justify-center gap-1.5">
@@ -78,13 +77,13 @@ function Onboarding() {
         ))}
       </div>
 
-      <AnimatePresence mode="wait" custom={stepDirection}>
+      <AnimatePresence mode="wait" custom={dir}>
         <motion.div
           key={step}
-          custom={stepDirection}
-          initial={{ opacity: 0, x: 28, filter: "blur(6px)" }}
+          custom={dir}
+          initial={{ opacity: 0, x: dir * 28, filter: "blur(6px)" }}
           animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+          exit={{ opacity: 0, x: dir * -20, filter: "blur(4px)" }}
           transition={{ duration: 0.32, ease: nativeEase }}
           className="flex-1"
         >

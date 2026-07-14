@@ -27,8 +27,14 @@ export function useLuna() {
       setPeriodDays(getPeriodDays());
       setReady(true);
     };
+    // luna:update covers profile/logs/periods changes
+    // luna:pill-update covers pill record changes (forces re-render for CycleRing)
     window.addEventListener("luna:update", load);
-    return () => window.removeEventListener("luna:update", load);
+    window.addEventListener("luna:pill-update", load);
+    return () => {
+      window.removeEventListener("luna:update", load);
+      window.removeEventListener("luna:pill-update", load);
+    };
   }, []);
 
   const insight = useMemo(

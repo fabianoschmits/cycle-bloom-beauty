@@ -267,7 +267,6 @@ function CycleRing({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.8, ...springSoft }}
-        transform={`rotate(-90 ${cx} ${cy})`}
         style={{ transformOrigin: `${progressDotX}px ${progressDotY}px` }}
       />
     </svg>

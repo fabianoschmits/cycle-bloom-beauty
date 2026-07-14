@@ -312,7 +312,7 @@ function DailyLogPrompt({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-[max(1rem,env(safe-area-inset-bottom))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -387,7 +387,7 @@ function UndoDialog({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-end justify-center p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-[max(1rem,env(safe-area-inset-bottom))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

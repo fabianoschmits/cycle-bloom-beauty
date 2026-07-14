@@ -86,5 +86,6 @@ export function clearAll() {
   localStorage.removeItem(PROFILE_KEY);
   localStorage.removeItem(LOGS_KEY);
   localStorage.removeItem(PERIODS_KEY);
+  localStorage.removeItem("luna.pill.v1");
   window.dispatchEvent(new Event("luna:update"));
 }
