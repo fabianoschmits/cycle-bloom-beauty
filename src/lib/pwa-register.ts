@@ -32,6 +32,8 @@ export function registerPWA() {
       .then((registration) => {
         console.log("[PWA] Service worker registered:", SW_PATH);
 
+        const hasController = !!navigator.serviceWorker.controller;
+
         registration.addEventListener("updatefound", () => {
           const worker = registration.installing;
           if (!worker) return;
@@ -45,9 +47,18 @@ export function registerPWA() {
         let refreshing = false;
         navigator.serviceWorker.addEventListener("controllerchange", () => {
           if (refreshing) return;
+          if (!hasController) return;
           refreshing = true;
           window.location.reload();
         });
+
+        // Proactively check for updates on startup
+        registration.update().catch(() => {});
+
+        // Check for updates every hour
+        setInterval(() => {
+          registration.update().catch(() => {});
+        }, 60 * 60 * 1000);
 
         return registration;
       })
