@@ -29,26 +29,7 @@ async function writeManifest() {
   await fs.writeFile(path.join(publicDir, "manifest.webmanifest"), JSON.stringify(manifest, null, 2), "utf8");
 }
 
-async function writeAppShell(indexJs, stylesCss) {
-  const shell = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#faf7f2" />
-  <meta name="description" content="Acompanhe seu ciclo menstrual com elegância, privacidade e insights diários." />
-  <title>Luna — Ciclo & Bem-estar</title>
-  <link rel="stylesheet" href="/assets/${stylesCss}" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-</head>
-<body>
-  <script type="module" src="/assets/${indexJs}"></script>
-</body>
-</html>`;
 
-  await fs.writeFile(path.join(publicDir, "app-shell.html"), shell, "utf8");
-}
 
 async function writeHeaders() {
   const headers = `/*
@@ -92,7 +73,6 @@ async function main() {
   }
 
   await writeManifest();
-  await writeAppShell(indexJs, stylesCss);
   await writeHeaders();
 
   const { count, size, warnings } = await generateSW({
@@ -100,7 +80,7 @@ async function main() {
     globDirectory: publicDir,
     globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,webmanifest,woff2,ttf}"],
     globIgnores: ["**/server/**", "**/*.map", "sw.js", "workbox-*.js"],
-    navigateFallback: "/app-shell.html",
+    navigateFallback: "/fallback.html",
     navigateFallbackDenylist: [/^\/api\//, /^\/assets\//, /^\/sw\.js$/, /^\/workbox-/, /\.[^/]+$/],
     cleanupOutdatedCaches: true,
     clientsClaim: true,
