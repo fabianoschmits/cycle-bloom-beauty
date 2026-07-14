@@ -3,11 +3,22 @@ import { getLogs, getPeriodDays, getProfile } from "@/lib/cycle/storage";
 import type { DailyLog, UserProfile } from "@/lib/cycle/types";
 import { computeInsight } from "@/lib/cycle/calculations";
 
+const isBrowser = typeof window !== "undefined";
+
 export function useLuna() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [logs, setLogs] = useState<Record<string, DailyLog>>({});
-  const [periodDays, setPeriodDays] = useState<string[]>([]);
-  const [ready, setReady] = useState(false);
+  // Lazy initializers read synchronously from localStorage on first render —
+  // no useEffect needed for the initial data, eliminating the "blank flash"
+  // and the double-tap issue when navigating between pages.
+  const [profile, setProfile] = useState<UserProfile | null>(() =>
+    isBrowser ? getProfile() : null,
+  );
+  const [logs, setLogs] = useState<Record<string, DailyLog>>(() =>
+    isBrowser ? getLogs() : {},
+  );
+  const [periodDays, setPeriodDays] = useState<string[]>(() =>
+    isBrowser ? getPeriodDays() : [],
+  );
+  const [ready, setReady] = useState(isBrowser);
 
   useEffect(() => {
     const load = () => {
@@ -16,7 +27,6 @@ export function useLuna() {
       setPeriodDays(getPeriodDays());
       setReady(true);
     };
-    load();
     window.addEventListener("luna:update", load);
     return () => window.removeEventListener("luna:update", load);
   }, []);
