@@ -16,6 +16,42 @@ import { InstallPrompt } from "../components/InstallPrompt";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { registerPWA } from "../lib/pwa-register";
 
+// Self-healing PWA logic: If a critical hydration or router invariant error occurs,
+// automatically clear service workers/caches and reload to pull the fresh deployment.
+if (typeof window !== "undefined") {
+  const handlePwaCrash = (err: any) => {
+    const msg = String(err?.message || err || "");
+    if (
+      msg.includes("Invariant failed") ||
+      msg.includes("hydration") ||
+      msg.includes("Hydration") ||
+      msg.includes("Minified React error")
+    ) {
+      console.warn("[PWA] Critical error detected. Clearing PWA caches to self-heal...");
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const reg of registrations) {
+            reg.unregister();
+          }
+          if (window.caches) {
+            caches.keys().then((keys) => {
+              Promise.all(keys.map((k) => caches.delete(k))).then(() => {
+                window.location.reload();
+              });
+            });
+          } else {
+            window.location.reload();
+          }
+        });
+      }
+    }
+  };
+
+  window.addEventListener("error", (e) => handlePwaCrash(e.error ?? e.message));
+  window.addEventListener("unhandledrejection", (e) => handlePwaCrash(e.reason));
+}
+
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-6">
