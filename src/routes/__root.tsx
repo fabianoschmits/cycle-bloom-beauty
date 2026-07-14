@@ -15,6 +15,7 @@ import { BottomNav } from "../components/BottomNav";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { registerPWA } from "../lib/pwa-register";
+import { PageTransitionOverlay } from "../components/PageTransitionOverlay";
 
 // Self-healing PWA logic: If a critical hydration or router invariant error occurs,
 // automatically clear service workers/caches and reload to pull the fresh deployment.
@@ -178,6 +179,7 @@ function RootComponent() {
         <AnimatedOutlet />
         {mounted && <BottomNav />}
         {mounted && <InstallPrompt />}
+        <PageTransitionOverlay />
       </div>
     </QueryClientProvider>
   );
